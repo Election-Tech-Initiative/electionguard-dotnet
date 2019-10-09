@@ -1,0 +1,3 @@
+[submodule "libs/ElectionGuard-SDK-C-Implementation"]
+	path = libs/ElectionGuard-SDK-C-Implementation
+	url = https://github.com/microsoft/ElectionGuard-SDK-C-Implementation.git
