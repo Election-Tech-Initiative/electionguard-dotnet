@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+		<LinuxLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.so" />
+		<MacOSLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dylib" />
+		<WindowsLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dll" />
+	</ItemGroup>
+  <Target Name="CopyLibraries" AfterTargets="AfterBuild">
+	  <Copy 
+		  SourceFiles="@(LinuxLibrary)" 
+		  DestinationFolder="$(OutDir)" />
+	  <Copy
+		  SourceFiles="@(MacOSLibrary)"
+		  DestinationFolder="$(OutDir)" />
+	  <Copy
+		  SourceFiles="@(WindowsLibrary)"
+		  DestinationFolder="$(OutDir)" />
+  </Target>
+</Project>
