@@ -1,6 +1,10 @@
 # Disable triggers
-trigger: none
-pr: none
+trigger:
+- master
+- develop
+pr:
+- master
+- develop
 
 stages:
 - stage: A
