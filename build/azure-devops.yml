@@ -54,7 +54,7 @@ stages:
       enabled: false
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'electionguard.dll'
+        ArtifactName: 'libelectionguard.so'
         publishLocation: 'Container'
     - task: DotNetCoreCLI@2
       displayName: 'Test'
@@ -118,7 +118,7 @@ stages:
       enabled: false
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'electionguard.dll'
+        ArtifactName: 'libelectionguard.dylib'
         publishLocation: 'Container'
     - task: DotNetCoreCLI@2
       displayName: 'Test'
