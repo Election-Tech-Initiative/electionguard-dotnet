@@ -1,5 +1,51 @@
 
-# Contributing
+# ElectionGuard CSharp
+
+## Building
+
+### C-Implementation Submodule
+For each platform, the C-Implementation in the submodule must be built first.
+The instructions vary per platform.
+
+1. Initialize the submodule
+2. Navigate to `libs\ElectionGuard-SDK-C-Implementation`
+3. Follow platform specific instructions
+
+#### Linux
+
+1. Install cmake and gmp
+2. `cmake -S . -B build -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `libelectionguard.so` should be created
+
+#### MacOS (.dylib)
+
+1. Install cmake and gmp (`brew install cmake gmp`)
+2. `cmake -S . -B build -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `libelectionguard.dylib` is created
+
+#### Windows (.dll)
+
+1. Install cmake and gmp ([Use Step 1 from Windows Instructions for C-Implementation](https://github.com/microsoft/ElectionGuard-SDK-C-Implementation/blob/master/README-windows.md))
+2. `cmake -S . -B build -G "MSYS Makefiles" -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `electionguard.dll` is created
+
+### C# Library Solution
+_Note: This build will copy the library created by the submodule build._
+
+Use Visual Studio or `dotnet build` to build.
+
+
+## Testing
+
+_Warning: Prior to testing, the submodule and the solution must be built in correct order._
+
+Use `dotnet test` to start unit tests or Visual Studio Test Explorer.
+
+
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
