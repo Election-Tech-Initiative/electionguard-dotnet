@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Models
+namespace ElectionGuard.SDK.KeyCeremony.Messages
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct TrusteeState
+    public struct AllSharesReceivedMessage
     {
         public long Length;
         public UIntPtr Bytes;

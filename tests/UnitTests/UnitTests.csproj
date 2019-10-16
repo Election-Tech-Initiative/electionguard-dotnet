@@ -4,9 +4,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeCoverage" Version="16.3.0" />
     <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ElectionGuard\ElectionGuard.SDK.csproj" />
@@ -17,14 +18,8 @@
 		<WindowsLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dll" />
 	</ItemGroup>
 	<Target Name="CopyLibraries" AfterTargets="AfterBuild">
-		<Copy
-			SourceFiles="@(LinuxLibrary)"
-			DestinationFolder="$(OutDir)" />
-		<Copy
-			SourceFiles="@(MacOSLibrary)"
-			DestinationFolder="$(OutDir)" />
-		<Copy
-			SourceFiles="@(WindowsLibrary)"
-			DestinationFolder="$(OutDir)" />
+		<Copy SourceFiles="@(LinuxLibrary)" DestinationFolder="$(OutDir)" />
+		<Copy SourceFiles="@(MacOSLibrary)" DestinationFolder="$(OutDir)" />
+		<Copy SourceFiles="@(WindowsLibrary)" DestinationFolder="$(OutDir)" />
 	</Target>
 </Project>
