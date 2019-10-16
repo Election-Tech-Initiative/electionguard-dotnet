@@ -1,42 +1,45 @@
 ﻿using System;
-using ElectionGuard.SDK.KeyCeremony.Models;
+using ElectionGuard.SDK.KeyCeremony.Messages;
+using ElectionGuard.SDK.KeyCeremony.Trustee;
 
 namespace ElectionGuard.SDK.KeyCeremony
 {
-    public class KeyCeremonyTrustee : TrusteeWrapper, IDisposable
+    public class KeyCeremonyTrustee : IDisposable
     {
-        private readonly Trustee _trustee;
+        private readonly UIntPtr _trustee;
 
         public KeyCeremonyTrustee(uint numberOfTrustees, uint threshold, uint index)
         {
-            var response = KeyCeremony_Trustee_new(numberOfTrustees, threshold, index);
-            _trustee = response.Trustee;
+            var response = TrusteeApi.NewTrustee(numberOfTrustees, threshold, index);
+            if (response.Status == TrusteeStatus.Success)
+            {
+                _trustee = response.Trustee;
+            }
+        }
+
+        public GenerateKeyReturn GenerateKey(byte[] bashHashCode)
+        {
+             return TrusteeApi.GenerateKey(_trustee, bashHashCode);
+        }
+
+        public GenerateSharesReturn GenerateShares(AllKeysReceivedMessage message)
+        {
+            return TrusteeApi.GenerateShares(_trustee, message);
+        }
+
+        public VerifySharesReturn VerifyShares(AllSharesReceivedMessage message)
+        {
+            return TrusteeApi.VerifyShares(_trustee, message);
+        }
+
+        public ExportStateReturn ExportState()
+        {
+            return TrusteeApi.ExportState(_trustee);
         }
 
         public void Dispose()
         {
-            // This may be only called once. Make pattern for that.
-            KeyCeremony_Trustee_free(_trustee);
-        }
-
-        public GenerateKeyResponse GenerateKey(byte[] baseHashCode)
-        {
-            return KeyCeremony_Trustee_generate_key(_trustee, baseHashCode);
-        }
-
-        public GenerateSharesResponse GenerateShares(AllKeysReceivedMessage message)
-        {
-            return KeyCeremony_Trustee_generate_shares(_trustee, message);
-        }
-
-        public VerifySharesResponse VerifyShares(AllSharesReceivedMessage message)
-        {
-            return KeyCeremony_Trustee_verify_shares(_trustee, message);
-        }
-
-        public ExportStateResponse ExportState()
-        {
-            return KeyCeremony_Trustee_export_state(_trustee);
+            TrusteeApi.FreeTrustee(_trustee);
         }
     }
 }

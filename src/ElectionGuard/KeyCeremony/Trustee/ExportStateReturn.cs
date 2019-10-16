@@ -1,11 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Models
+namespace ElectionGuard.SDK.KeyCeremony.Trustee
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct NewTrusteeResponse
+    public struct ExportStateReturn
     {
         public TrusteeStatus Status;
-        public Trustee Trustee;
+        public TrusteeState State;
     }
 }

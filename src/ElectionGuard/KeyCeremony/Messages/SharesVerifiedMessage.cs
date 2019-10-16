@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Models
+namespace ElectionGuard.SDK.KeyCeremony.Messages
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct SharesGeneratedMessage
+    public class SharesVerifiedMessage
     {
         public long Length;
         public UIntPtr Bytes;
