@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Models
+namespace ElectionGuard.SDK.Cryptography
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct KeyGeneratedMessage
+    public struct JointPublicKey
     {
         public long Length;
         public UIntPtr Bytes;

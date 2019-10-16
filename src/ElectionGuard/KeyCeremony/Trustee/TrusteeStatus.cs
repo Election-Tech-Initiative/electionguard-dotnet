@@ -1,4 +1,4 @@
-﻿namespace ElectionGuard.SDK.KeyCeremony.Models
+﻿namespace ElectionGuard.SDK.KeyCeremony.Trustee
 {
     public enum TrusteeStatus
     {
