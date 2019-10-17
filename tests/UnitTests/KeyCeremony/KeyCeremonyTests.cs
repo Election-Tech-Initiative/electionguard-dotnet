@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.KeyCeremony.Coordinator;
@@ -8,7 +9,12 @@ using NUnit.Framework;
 
 namespace UnitTests.KeyCeremony
 {
+    [TestFixture(1u, 1u)]
+    [TestFixture(2u, 2u)]
+    [TestFixture(3u, 3u)]
+    [TestFixture(4u, 4u)]
     [TestFixture(5u, 5u)]
+    [TestFixture(6u, 6u)]
     public class KeyCeremonyTests
     {
         private readonly byte[] _baseHashCode = { 0,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
@@ -21,7 +27,7 @@ namespace UnitTests.KeyCeremony
         private AllSharesReceivedMessage _allSharesReceivedMessage;
         private List<TrusteeState> _trusteeStates;
 
-        public KeyCeremonyTests(uint numberOfTrustees = 1u, uint threshold = 1u)
+        public KeyCeremonyTests(uint numberOfTrustees = 1, uint threshold = 1)
         {
             _numberOfTrustees = numberOfTrustees;
             _threshold = threshold;
@@ -30,7 +36,16 @@ namespace UnitTests.KeyCeremony
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            if (_numberOfTrustees > MaxValues.MaxTrustees || _threshold > MaxValues.MaxTrustees)
+            {
+                Assert.Ignore("Max Trustees Exceeded. Tests Ignored");
+            }
             _parameters = new CryptographyParameters();
+        }
+
+        [Test, Order(1)]
+        public void InitializeKeyCeremonyTest()
+        {
             _coordinator = new KeyCeremonyCoordinator(_numberOfTrustees, _threshold);
             _trustees = new List<KeyCeremonyTrustee>();
             _trusteeStates = new List<TrusteeState>();
@@ -38,13 +53,13 @@ namespace UnitTests.KeyCeremony
             {
                 _trustees.Add(new KeyCeremonyTrustee(_numberOfTrustees, _threshold, i));
             }
+            Assert.NotNull(_coordinator);
+            Assert.AreEqual(_numberOfTrustees, _trustees.Count);
         }
 
-        [Test, Order(1)]
+        [Test, Order(2)]
         public void GenerateKeyTest()
         {
-            Assert.AreEqual(_numberOfTrustees, _trustees.Count);
-
             var missingTrusteesKeysReturn = _coordinator.AllKeysReceived();
             Assert.AreEqual(CoordinatorStatus.MissingTrustees, missingTrusteesKeysReturn.Status);
             
@@ -63,7 +78,7 @@ namespace UnitTests.KeyCeremony
             _allKeysReceivedMessage = allKeysReceivedReturn.Message;
         }
 
-        [Test, Order(2)]
+        [Test, Order(3)]
         public void GenerateSharesTest()
         {
             var missingTrusteesSharesReturn = _coordinator.AllSharesReceived();
@@ -84,7 +99,7 @@ namespace UnitTests.KeyCeremony
             _allSharesReceivedMessage = allSharesReceivedReturn.Message;
         }
 
-        [Test, Order(3)]
+        [Test, Order(4)]
         public void VerifySharesTest()
         {
             var missingTrusteesVerifiedSharesReturn = _coordinator.PublishJointKey();
@@ -103,7 +118,7 @@ namespace UnitTests.KeyCeremony
             Assert.AreEqual(CoordinatorStatus.Success, publishJointKeyReturn.Status);
         }
 
-        [Test, Order(4)]
+        [Test, Order(5)]
         public void ExportStateTest()
         {
             foreach (var trustee in _trustees)
@@ -116,15 +131,20 @@ namespace UnitTests.KeyCeremony
             Assert.AreEqual(_numberOfTrustees, _trusteeStates.Count);
         }
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
+        [Test, Order(6)]
+        public void KeyCeremonyDisposeTest()
         {
-            _parameters.Dispose();
             _coordinator.Dispose();
             foreach (var trustee in _trustees)
             {
                 trustee.Dispose();
             }
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _parameters.Dispose();
         }
     }
 }
