@@ -1,10 +1,11 @@
 ﻿using System;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
+using ElectionGuard.SDK.Utility;
 
 namespace ElectionGuard.SDK.KeyCeremony
 {
-    public class KeyCeremonyTrustee : IDisposable
+    public class KeyCeremonyTrustee : SafePointer, IDisposable
     {
         private readonly UIntPtr _trustee;
 
@@ -15,31 +16,35 @@ namespace ElectionGuard.SDK.KeyCeremony
             {
                 _trustee = response.Trustee;
             }
+            else
+            {
+                throw new Exception("Failed to create key ceremony trustee");
+            }
         }
 
         public GenerateKeyReturn GenerateKey(byte[] bashHashCode)
         {
-             return TrusteeApi.GenerateKey(_trustee, bashHashCode);
+             return Protect(_trustee, () => TrusteeApi.GenerateKey(_trustee, bashHashCode));
         }
 
         public GenerateSharesReturn GenerateShares(AllKeysReceivedMessage message)
         {
-            return TrusteeApi.GenerateShares(_trustee, message);
+            return Protect(_trustee, () => TrusteeApi.GenerateShares(_trustee, message));
         }
 
         public VerifySharesReturn VerifyShares(AllSharesReceivedMessage message)
         {
-            return TrusteeApi.VerifyShares(_trustee, message);
+            return Protect(_trustee, () => TrusteeApi.VerifyShares(_trustee, message));
         }
 
         public ExportStateReturn ExportState()
         {
-            return TrusteeApi.ExportState(_trustee);
+            return Protect(_trustee, () => TrusteeApi.ExportState(_trustee));
         }
 
         public void Dispose()
         {
-            TrusteeApi.FreeTrustee(_trustee);
+            ProtectVoid(_trustee, () => TrusteeApi.FreeTrustee(_trustee));
         }
     }
 }

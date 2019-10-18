@@ -13,7 +13,7 @@ The instructions vary per platform.
 
 #### Linux
 
-1. Install cmake and gmp
+1. Install cmake and gmp (`sudo apt-get install cmake libgmp3-dev`)
 2. `cmake -S . -B build -DBUILD_SHARED_LIBS=ON`
 3. `cmake --build build`
 4. `libelectionguard.so` should be created

@@ -1,10 +1,11 @@
 ﻿using System;
 using ElectionGuard.SDK.KeyCeremony.Coordinator;
 using ElectionGuard.SDK.KeyCeremony.Messages;
+using ElectionGuard.SDK.Utility;
 
 namespace ElectionGuard.SDK.KeyCeremony
 {
-    public class KeyCeremonyCoordinator : IDisposable
+    public class KeyCeremonyCoordinator : SafePointer, IDisposable
     {
         private readonly UIntPtr _coordinator;
 
@@ -15,41 +16,45 @@ namespace ElectionGuard.SDK.KeyCeremony
             {
                 _coordinator = response.Coordinator;
             }
+            else
+            {
+                throw new Exception("Failed to create key ceremony coordinator");
+            }
         }
 
         public CoordinatorStatus ReceiveKey(KeyGeneratedMessage message)
         {
-            return CoordinatorApi.ReceiveKeyGenerated(_coordinator, message);
+            return Protect(_coordinator, () => CoordinatorApi.ReceiveKeyGenerated(_coordinator, message));
         }
 
         public AllKeysReceivedReturn AllKeysReceived()
         {
-            return CoordinatorApi.AllKeysReceived(_coordinator);
+            return Protect(_coordinator, () => CoordinatorApi.AllKeysReceived(_coordinator));
         }
 
         public CoordinatorStatus ReceiveShares(SharesGeneratedMessage message)
         {
-            return CoordinatorApi.ReceiveSharesGenerated(_coordinator, message);
+            return Protect(_coordinator, () => CoordinatorApi.ReceiveSharesGenerated(_coordinator, message));
         }
 
         public AllSharesReceivedReturn AllSharesReceived()
         {
-            return CoordinatorApi.AllSharesReceived(_coordinator);
+            return Protect(_coordinator, () => CoordinatorApi.AllSharesReceived(_coordinator));
         }
 
         public CoordinatorStatus ReceiveSharesVerification(SharesVerifiedMessage message)
         {
-            return CoordinatorApi.ReceiveSharesVerified(_coordinator, message);
+            return Protect(_coordinator, () => CoordinatorApi.ReceiveSharesVerified(_coordinator, message));
         }
 
         public PublishJointKeyReturn PublishJointKey()
         {
-            return CoordinatorApi.PublishJointKey(_coordinator);
+            return Protect(_coordinator, () => CoordinatorApi.PublishJointKey(_coordinator));
         }
 
         public void Dispose()
         {
-            CoordinatorApi.FreeCoordinator(_coordinator);
+            ProtectVoid(_coordinator, () => CoordinatorApi.FreeCoordinator(_coordinator));
         }
     }
 }
