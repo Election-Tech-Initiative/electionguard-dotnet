@@ -5,7 +5,7 @@ using ElectionGuard.SDK.KeyCeremony.Messages;
 
 namespace ElectionGuard.SDK.KeyCeremony.Coordinator
 {
-    public static class CoordinatorApi
+    internal static class CoordinatorApi
     {
         [DllImport("electionguard", EntryPoint = "KeyCeremony_Coordinator_new")]
         internal static extern NewCoordinatorReturn NewCoordinator(uint numberOfTrustees, uint threshold);

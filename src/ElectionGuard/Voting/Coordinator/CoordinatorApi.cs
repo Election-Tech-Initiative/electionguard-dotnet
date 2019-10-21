@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Voting.Messages;
 using ElectionGuard.SDK.IO;
 
 namespace ElectionGuard.SDK.Voting.Coordinator
 {
-    public static class CoordinatorApi
+    internal static class CoordinatorApi
     {
         [DllImport("electionguard", EntryPoint = "Voting_Coordinator_new")]
         internal static extern NewCoordinatorReturn NewCoordinator(uint numberOfSelections);
