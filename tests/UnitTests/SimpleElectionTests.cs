@@ -7,6 +7,7 @@ using ElectionGuard.SDK.IO;
 using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
+using ElectionGuard.SDK.StateManagement;
 using ElectionGuard.SDK.Voting;
 using ElectionGuard.SDK.Voting.Encrypter;
 using NUnit.Framework;
