@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Trustee
+namespace ElectionGuard.SDK.Voting.Messages
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct TrusteeState
+    public struct BallotTracker
     {
         public long Length;
-        public IntPtr Bytes;
+        public UIntPtr Bytes;
     }
 }
