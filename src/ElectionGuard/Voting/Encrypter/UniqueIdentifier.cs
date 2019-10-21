@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Trustee
+namespace ElectionGuard.SDK.Voting.Encrypter
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct TrusteeState
+    public struct UniqueIdentifier
     {
         public long Length;
         public IntPtr Bytes;
