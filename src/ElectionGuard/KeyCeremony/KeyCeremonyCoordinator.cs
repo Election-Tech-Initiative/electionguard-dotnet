@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using ElectionGuard.SDK.KeyCeremony.Coordinator;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.Utility;
@@ -50,6 +51,14 @@ namespace ElectionGuard.SDK.KeyCeremony
         public PublishJointKeyReturn PublishJointKey()
         {
             return Protect(_coordinator, () => CoordinatorApi.PublishJointKey(_coordinator));
+        }
+
+        public string GetPublishedJointKey()
+        {
+            var publishJointKey = PublishJointKey().Key;
+            var jointKey = new byte[publishJointKey.Length];
+            Marshal.Copy(publishJointKey.Bytes, jointKey, 0, (int)publishJointKey.Length);
+            return BitConverter.ToString(jointKey);
         }
 
         public void Dispose()

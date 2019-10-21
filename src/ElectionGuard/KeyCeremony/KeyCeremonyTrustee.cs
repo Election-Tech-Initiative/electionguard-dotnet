@@ -1,4 +1,5 @@
 ﻿using System;
+using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
 using ElectionGuard.SDK.Utility;
@@ -22,9 +23,13 @@ namespace ElectionGuard.SDK.KeyCeremony
             }
         }
 
-        public GenerateKeyReturn GenerateKey(byte[] bashHashCode)
+        public GenerateKeyReturn GenerateKey(byte[] baseHashCode)
         {
-             return Protect(_trustee, () => TrusteeApi.GenerateKey(_trustee, bashHashCode));
+            if (baseHashCode.Length > CryptographySettings.HashDigestSizeBytes)
+            {
+                throw new ArgumentOutOfRangeException(nameof(baseHashCode));
+            }
+            return Protect(_trustee, () => TrusteeApi.GenerateKey(_trustee, baseHashCode));
         }
 
         public GenerateSharesReturn GenerateShares(AllKeysReceivedMessage message)

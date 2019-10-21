@@ -7,6 +7,6 @@ namespace ElectionGuard.SDK.Cryptography
     public struct JointPublicKey
     {
         public long Length;
-        public UIntPtr Bytes;
+        public IntPtr Bytes;
     }
 }
