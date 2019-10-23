@@ -1,7 +1,7 @@
 ﻿using System;
 using ElectionGuard.SDK.Config;
 
-namespace UnitTests
+namespace UnitTests.Mocks
 {
     public static class BallotGenerator
     {

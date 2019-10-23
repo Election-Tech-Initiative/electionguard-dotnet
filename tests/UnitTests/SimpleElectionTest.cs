@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using NUnit.Framework;
 using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Cryptography;
+using ElectionGuard.SDK.Decryption;
+using ElectionGuard.SDK.Decryption.Messages;
 using ElectionGuard.SDK.IO;
 using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.KeyCeremony.Messages;
-using ElectionGuard.SDK.KeyCeremony.Trustee;
 using ElectionGuard.SDK.StateManagement;
 using ElectionGuard.SDK.Voting;
 using ElectionGuard.SDK.Voting.Encrypter;
-using NUnit.Framework;
+using UnitTests.Mocks;
+
 using KeyCeremonyCoordinatorStatus = ElectionGuard.SDK.KeyCeremony.Coordinator.CoordinatorStatus;
 using VotingCoordinatorStatus = ElectionGuard.SDK.Voting.Coordinator.CoordinatorStatus;
+using DecryptionCoordinatorStatus = ElectionGuard.SDK.Decryption.Coordinator.CoordinatorStatus;
+using KeyCeremonyTrusteeStatus = ElectionGuard.SDK.KeyCeremony.Trustee.TrusteeStatus;
+using DecryptionTrusteeStatus = ElectionGuard.SDK.Decryption.Trustee.TrusteeStatus;
 
 namespace UnitTests
 {
-    [TestFixture(5u, 5u, 1u, 5u, 3u)]
-    [TestFixture(3u, 3u, 2u, 10u, 2u)]
-    public class SimpleElectionTests
+    [TestFixture(3u, 3u, 1u, 3u, 3u)]
+    public class SimpleElectionTest
     {
         private readonly byte[] _baseHashCode = { 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         private readonly uint _numberOfTrustees;
@@ -27,25 +32,37 @@ namespace UnitTests
         private readonly uint _numberOfSelections;
         private readonly uint _numberOfBallotsPerEncrypter;
         private CryptographyParameters _parameters;
+
+        // Key Ceremony
+        private const string KeyCeremonyStage = "Key Ceremony";
         private KeyCeremonyCoordinator _keyCeremonyCoordinator;
         private List<KeyCeremonyTrustee> _keyCeremonyTrustees;
         private AllKeysReceivedMessage _allKeysReceivedMessage;
         private AllSharesReceivedMessage _allSharesReceivedMessage;
         private List<TrusteeState> _trusteeStates;
         private JointPublicKey _jointKey;
+
+        // Voting
+        private const string VotingStage = "Voting";
         private VotingCoordinator _votingCoordinator;
         private List<VotingEncrypter> _votingEncrypters;
-        private const string KeyCeremonyStage = "Key Ceremony";
-        private const string VotingStage = "Voting";
         private const string VotingResultsPrefix = "voting_result";
+        private File _votingResultsFile;
+
+        // Decryption
+        private const string DecryptionStage = "Decryption";
+        private DecryptionCoordinator _decryptionCoordinator;
+        private List<DecryptionTrustee> _decryptionTrustees;
+        private DecryptionFragmentsRequest[] _decryptionFragmentsRequests;
+        private byte[] _decryptionRequestPresent;
         private const string TallyPrefix = "tally";
 
-        public SimpleElectionTests(
-            uint numberOfTrustees = 1,
-            uint threshold = 1,
-            uint numberOfEncrypters = 1,
-            uint numberOfSelections = 1,
-            uint numberOfBallotsPerEncrypter = 1)
+        public SimpleElectionTest(
+            uint numberOfTrustees,
+            uint threshold,
+            uint numberOfEncrypters,
+            uint numberOfSelections,
+            uint numberOfBallotsPerEncrypter)
         {
             _numberOfTrustees = numberOfTrustees;
             _threshold = threshold;
@@ -57,16 +74,25 @@ namespace UnitTests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            _parameters = new CryptographyParameters();
+
             if (_numberOfTrustees > MaxValues.MaxTrustees || _threshold > MaxValues.MaxTrustees)
             {
                 Assert.Ignore("Max Trustees Exceeded. Tests Ignored");
             }
-            _parameters = new CryptographyParameters();
+            if (_numberOfSelections > MaxValues.MaxSelections)
+            {
+                Assert.Ignore("Max Selections Exceeded. Tests Ignored");
+            }
+            if (_numberOfBallotsPerEncrypter * _numberOfEncrypters > MaxValues.MaxBallots)
+            {
+                Assert.Ignore("Max Ballots Exceeded. Tests Ignored");
+            }
         }
 
-        [Test, Order(1)]
+        [Test, Order(1), NonParallelizable]
         [Category(KeyCeremonyStage)]
-        public void InitializeKeyCeremonyTest()
+        public void Step01_InitializeKeyCeremony()
         {
             _keyCeremonyCoordinator = new KeyCeremonyCoordinator(_numberOfTrustees, _threshold);
             _keyCeremonyTrustees = new List<KeyCeremonyTrustee>();
@@ -79,9 +105,9 @@ namespace UnitTests
             Assert.AreEqual(_numberOfTrustees, _keyCeremonyTrustees.Count);
         }
 
-        [Test, Order(2)]
+        [Test, Order(2), NonParallelizable]
         [Category(KeyCeremonyStage)]
-        public void GenerateKeyTest()
+        public void Step02_GenerateKey()
         {
             var missingTrusteesKeysReturn = _keyCeremonyCoordinator.AllKeysReceived();
             Assert.AreEqual(KeyCeremonyCoordinatorStatus.MissingTrustees, missingTrusteesKeysReturn.Status);
@@ -89,7 +115,7 @@ namespace UnitTests
             foreach (var trustee in _keyCeremonyTrustees)
             {
                 var keyGeneratedReturn = trustee.GenerateKey(_baseHashCode);
-                Assert.AreEqual(TrusteeStatus.Success, keyGeneratedReturn.Status);
+                Assert.AreEqual(KeyCeremonyTrusteeStatus.Success, keyGeneratedReturn.Status);
 
                 var keyReceivedStatus = _keyCeremonyCoordinator.ReceiveKey(keyGeneratedReturn.Message);
                 Assert.AreEqual(KeyCeremonyCoordinatorStatus.Success, keyReceivedStatus);
@@ -101,9 +127,9 @@ namespace UnitTests
             _allKeysReceivedMessage = allKeysReceivedReturn.Message;
         }
 
-        [Test, Order(3)]
+        [Test, Order(3), NonParallelizable]
         [Category(KeyCeremonyStage)]
-        public void GenerateSharesTest()
+        public void Step03_GenerateShares()
         {
             var missingTrusteesSharesReturn = _keyCeremonyCoordinator.AllSharesReceived();
             Assert.AreEqual(KeyCeremonyCoordinatorStatus.MissingTrustees, missingTrusteesSharesReturn.Status);
@@ -111,7 +137,7 @@ namespace UnitTests
             foreach (var trustee in _keyCeremonyTrustees)
             {
                 var generateShareResponse = trustee.GenerateShares(_allKeysReceivedMessage);
-                Assert.AreEqual(TrusteeStatus.Success, generateShareResponse.Status);
+                Assert.AreEqual(KeyCeremonyTrusteeStatus.Success, generateShareResponse.Status);
 
                 var receiveShareStatus = _keyCeremonyCoordinator.ReceiveShares(generateShareResponse.Message);
                 Assert.AreEqual(KeyCeremonyCoordinatorStatus.Success, receiveShareStatus);
@@ -123,9 +149,9 @@ namespace UnitTests
             _allSharesReceivedMessage = allSharesReceivedReturn.Message;
         }
 
-        [Test, Order(4)]
+        [Test, Order(4), NonParallelizable]
         [Category(KeyCeremonyStage)]
-        public void VerifySharesTest()
+        public void Step04_VerifyShares()
         {
             var missingTrusteesVerifiedSharesReturn = _keyCeremonyCoordinator.PublishJointKey();
             Assert.AreEqual(KeyCeremonyCoordinatorStatus.MissingTrustees, missingTrusteesVerifiedSharesReturn.Status);
@@ -133,7 +159,7 @@ namespace UnitTests
             foreach (var trustee in _keyCeremonyTrustees)
             {
                 var verifySharesReturn = trustee.VerifyShares(_allSharesReceivedMessage);
-                Assert.AreEqual(TrusteeStatus.Success, verifySharesReturn.Status);
+                Assert.AreEqual(KeyCeremonyTrusteeStatus.Success, verifySharesReturn.Status);
 
                 var receivedVerifiedSharesStatus = _keyCeremonyCoordinator.ReceiveSharesVerification(verifySharesReturn.Message);
                 Assert.AreEqual(KeyCeremonyCoordinatorStatus.Success, receivedVerifiedSharesStatus);
@@ -148,14 +174,14 @@ namespace UnitTests
             TestContext.WriteLine($"Joint Key: {BitConverter.ToString(jointKey)}");
         }
 
-        [Test, Order(5)]
+        [Test, Order(5), NonParallelizable]
         [Category(KeyCeremonyStage)]
-        public void ExportStateTest()
+        public void Step05_ExportState()
         {
             foreach (var trustee in _keyCeremonyTrustees)
             {
                 var exportStateReturn = trustee.ExportState();
-                Assert.AreEqual(TrusteeStatus.Success, exportStateReturn.Status);
+                Assert.AreEqual(KeyCeremonyTrusteeStatus.Success, exportStateReturn.Status);
 
                 _trusteeStates.Add(exportStateReturn.State);
                 var state = new byte[exportStateReturn.State.Length];
@@ -165,20 +191,9 @@ namespace UnitTests
             Assert.AreEqual(_numberOfTrustees, _trusteeStates.Count);
         }
 
-        [Test, Order(6)]
-        [Category(KeyCeremonyStage)]
-        public void KeyCeremonyDisposeTest()
-        {
-            _keyCeremonyCoordinator.Dispose();
-            foreach (var trustee in _keyCeremonyTrustees)
-            {
-                trustee.Dispose();
-            }
-        }
-
-        [Test, Order(7)]
+        [Test, Order(6), NonParallelizable]
         [Category(VotingStage)]
-        public void VotingInitializationTest()
+        public void Step06_VotingInitialization()
         {
             _votingEncrypters = new List<VotingEncrypter>();
             _votingCoordinator = new VotingCoordinator(_numberOfSelections);
@@ -186,11 +201,13 @@ namespace UnitTests
             {
                 _votingEncrypters.Add(new VotingEncrypter(_jointKey, _numberOfSelections, _baseHashCode));
             }
+            Assert.NotNull(_votingCoordinator);
+            Assert.AreEqual(_numberOfEncrypters, _votingEncrypters.Count);
         }
 
-        [Test, Order(8)]
+        [Test, Order(7), NonParallelizable]
         [Category(VotingStage)]
-        public void SimulateVotingTest()
+        public void Step07_SimulateVoting()
         {
             foreach (var encrypter in _votingEncrypters)
             {
@@ -222,32 +239,111 @@ namespace UnitTests
             }
         }
 
-        [Test, Order(9)]
+        [Test, Order(8), NonParallelizable]
         [Category(VotingStage)]
-        public void ExportBallotsTest()
+        public void Step08_ExportBallots()
         {
-            var filePointer = ExportTools.CreateNewFile(VotingResultsPrefix);
-            var exportStatus = _votingCoordinator.ExportBallots(filePointer);
+            _votingResultsFile = FileTools.CreateNewFile(VotingResultsPrefix);
+            var exportStatus = _votingCoordinator.ExportBallots(_votingResultsFile);
             Assert.AreEqual(VotingCoordinatorStatus.Success, exportStatus);
-            
-            ExportTools.CloseFile(filePointer);
         }
 
-        [Test, Order(10)]
-        [Category(VotingStage)]
-        public void DisposeVotingTest()
+        [Test, Order(9), NonParallelizable]
+        [Category(DecryptionStage)]
+        public void Step09_InitializeDecryption()
         {
-            _votingCoordinator.Dispose();
-            foreach (var encrypter in _votingEncrypters)
+            _decryptionCoordinator = new DecryptionCoordinator(_numberOfTrustees, _threshold);
+            _decryptionTrustees = new List<DecryptionTrustee>();
+            foreach(var trusteeState in _trusteeStates)
             {
-                encrypter.Dispose();
+                _decryptionTrustees.Add(new DecryptionTrustee(_numberOfTrustees, _threshold, _numberOfSelections, trusteeState, _baseHashCode));
             }
+            Assert.NotNull(_decryptionCoordinator);
+            Assert.AreEqual(_numberOfTrustees, _decryptionTrustees.Count);
         }
+
+        [Test, Order(10), NonParallelizable]
+        [Category(DecryptionStage)]
+        public void Step10_TallyVotingRecords()
+        {
+            foreach (var trustee in _decryptionTrustees)
+            {
+                FileTools.SeekFileToBeginning(_votingResultsFile);
+                var tallyStatus = trustee.TallyVotingRecord(_votingResultsFile);
+                Assert.AreEqual(DecryptionTrusteeStatus.Success, tallyStatus);
+            }
+            FileTools.CloseFile(_votingResultsFile);
+        }
+
+        [Test, Order(11), NonParallelizable]
+        [Category(DecryptionStage)]
+        public void Step11_DecryptTallyShares()
+        {
+            foreach (var trustee in _decryptionTrustees)
+            {
+                var computeShareReturn = trustee.ComputeShare();
+                Assert.AreEqual(DecryptionTrusteeStatus.Success, computeShareReturn.Status);
+
+                var receiveShareStatus = _decryptionCoordinator.ReceiveShare(computeShareReturn.Share);
+                Assert.AreEqual(DecryptionCoordinatorStatus.Success, receiveShareStatus);
+            }
+
+            var allSharesReceivedReturn = _decryptionCoordinator.AllSharesReceived();
+            Assert.AreEqual(DecryptionCoordinatorStatus.Success, allSharesReceivedReturn.Status);
+
+            Assert.AreEqual(_numberOfTrustees, allSharesReceivedReturn.NumberOfTrustees);
+            Assert.LessOrEqual(_numberOfTrustees, allSharesReceivedReturn.RequestPresent.Length);
+            Assert.LessOrEqual(_numberOfTrustees, allSharesReceivedReturn.Requests.Length);
+
+            _decryptionRequestPresent = allSharesReceivedReturn.RequestPresent;
+            _decryptionFragmentsRequests = allSharesReceivedReturn.Requests;
+        }
+
+        [Test, Order(12), NonParallelizable]
+        [Category(DecryptionStage)]
+        public void Step12_DecryptTallyDecryptionFragments()
+        {
+            for(var i = 0; i < _decryptionTrustees.Count; i++)
+            {
+                if (DecryptionTools.TrusteeMustBePresent(_decryptionRequestPresent[i]))
+                {
+                    var computeFragmentsReturn = _decryptionTrustees[i].ComputeFragments(_decryptionFragmentsRequests[i]);
+                    Assert.AreEqual(DecryptionTrusteeStatus.Success, computeFragmentsReturn.Status);
+
+                    var receiveFragmentsStatus = _decryptionCoordinator.ReceiveFragments(computeFragmentsReturn.Fragments);
+                    Assert.AreEqual(DecryptionCoordinatorStatus.Success, receiveFragmentsStatus);
+                }
+            }
+
+            var tallyFile = FileTools.CreateNewFile(TallyPrefix);
+            var allFragmentsReceivedStatus = _decryptionCoordinator.AllFragmentsReceived(tallyFile);
+            Assert.AreEqual(DecryptionCoordinatorStatus.Success, allFragmentsReceivedStatus);
+            FileTools.CloseFile(tallyFile);
+        }
+
 
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
             _parameters.Dispose();
+
+            _keyCeremonyCoordinator.Dispose();
+            foreach (var trustee in _keyCeremonyTrustees)
+            {
+                trustee.Dispose();
+            }
+
+            _votingCoordinator.Dispose();
+            foreach (var encrypter in _votingEncrypters)
+            {
+                encrypter.Dispose();
+            }
+
+            _decryptionCoordinator.Dispose();
+            foreach (var trustee in _decryptionTrustees)
+            {
+                trustee.Dispose();
+            }
         }
     }
 }
