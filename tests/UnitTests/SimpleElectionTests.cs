@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Cryptography;
+using ElectionGuard.SDK.IO;
 using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
@@ -35,6 +36,8 @@ namespace UnitTests
         private List<VotingEncrypter> _votingEncrypters;
         private const string KeyCeremonyStage = "Key Ceremony";
         private const string VotingStage = "Voting";
+        private const string VotingResultsPrefix = "voting_result";
+        private const string TallyPrefix = "tally";
 
         public SimpleElectionTests(
             uint numberOfTrustees = 1,
@@ -222,6 +225,11 @@ namespace UnitTests
         [Category(VotingStage)]
         public void ExportBallotsTest()
         {
+            var filePointer = ExportTools.CreateNewFile(VotingResultsPrefix);
+            var exportStatus = _votingCoordinator.ExportBallots(filePointer);
+            Assert.AreEqual(VotingCoordinatorStatus.Success, exportStatus);
+            
+            ExportTools.CloseFile(filePointer);
         }
 
         [Test, Order(10)]

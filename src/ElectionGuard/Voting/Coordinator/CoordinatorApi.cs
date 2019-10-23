@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Voting.Messages;
 using ElectionGuard.SDK.IO;
@@ -23,6 +23,6 @@ namespace ElectionGuard.SDK.Voting.Coordinator
         internal static extern CoordinatorStatus SpoilBallot(UIntPtr coordinator, BallotIdentifier ballotId);
 
         [DllImport("electionguard", EntryPoint = "Voting_Coordinator_export_ballots")]
-        internal static extern CoordinatorStatus ExportBallots(UIntPtr coordinator, ref File file);
+        internal static extern CoordinatorStatus ExportBallots(UIntPtr coordinator, File file);
     }
 }

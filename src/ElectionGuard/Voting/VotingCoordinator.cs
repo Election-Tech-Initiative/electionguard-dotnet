@@ -39,13 +39,13 @@ namespace ElectionGuard.SDK.Voting
             
         }
 
-        public CoordinatorStatus ExportBallots(ref File file)
+        public CoordinatorStatus ExportBallots(File file)
         {
             if (_coordinator == UIntPtr.Zero)
             {
                 throw new NullReferenceException();
             }
-            return CoordinatorApi.ExportBallots(_coordinator, ref file);
+            return CoordinatorApi.ExportBallots(_coordinator, file);
         }
 
         public void Dispose()
