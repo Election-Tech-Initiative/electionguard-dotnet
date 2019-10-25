@@ -1,0 +1,68 @@
+name: PR Build
+
+on: [pull_request]
+
+jobs:
+  linux_build:
+    name: 'Linux Build'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Upgrade cmake
+      run: | 
+        sudo mv /usr/local/bin/cmake /usr/local/bin/cmake-old
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8611B7A28669BB93
+        sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+        sudo apt-get update && sudo apt-get install -y cmake
+        cmake --version
+    - name: Build C Library
+      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
+      run: |
+        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
+        cmake --build build
+    - name: Build
+      run: dotnet build
+    - name: Test
+      if: false
+      run: dotnet test
+  windows_build:
+    name: 'Windows Build'
+    runs-on: 'windows-latest'
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Build C Library
+      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
+      if: false
+      run: |
+        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
+        cmake --build build
+    - name: Build
+      run: dotnet build
+    - name: Test
+      if: false
+      run: dotnet test
+  macos_build:
+    name: 'MacOS Build'
+    runs-on: 'macOS-latest'
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Install gmp
+      run: brew install gmp
+    - name: Upgrade dotnet core sdk
+      run: brew cask install dotnet-sdk
+    - name: Build C Library
+      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
+      run: |
+        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
+        cmake --build build
+    - name: Build
+      run: dotnet build
+    - name: Test
+      if: false
+      run: dotnet test
