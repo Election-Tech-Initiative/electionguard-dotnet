@@ -5,6 +5,7 @@ using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.KeyCeremony.Coordinator;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
+using ElectionGuard.SDK.StateManagement;
 using NUnit.Framework;
 
 namespace UnitTests.KeyCeremony

@@ -4,7 +4,7 @@ using ElectionGuard.SDK.Cryptography;
 
 namespace ElectionGuard.SDK.Voting.Encrypter
 {
-    public struct EncrypterApi
+    internal struct EncrypterApi
     {
         [DllImport("electionguard", EntryPoint = "Voting_Encrypter_new")]
         internal static extern NewEncrypterReturn NewEncrypter(UniqueIdentifier uniqueIdentifier, JointPublicKey jointKey, uint numberOfSelections, [MarshalAs(UnmanagedType.LPArray, SizeConst = CryptographySettings.HashDigestSizeBytes)] byte[] baseHash);

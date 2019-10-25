@@ -5,7 +5,7 @@ using ElectionGuard.SDK.IO;
 
 namespace ElectionGuard.SDK.Voting.Coordinator
 {
-    public static class CoordinatorApi
+    internal static class CoordinatorApi
     {
         [DllImport("electionguard", EntryPoint = "Voting_Coordinator_new")]
         internal static extern NewCoordinatorReturn NewCoordinator(uint numberOfSelections);
@@ -23,6 +23,6 @@ namespace ElectionGuard.SDK.Voting.Coordinator
         internal static extern CoordinatorStatus SpoilBallot(UIntPtr coordinator, BallotIdentifier ballotId);
 
         [DllImport("electionguard", EntryPoint = "Voting_Coordinator_export_ballots")]
-        internal static extern CoordinatorStatus ExportBallots(UIntPtr coordinator, ref File file);
+        internal static extern CoordinatorStatus ExportBallots(UIntPtr coordinator, File file);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using ElectionGuard.SDK.StateManagement;
 
 namespace ElectionGuard.SDK.KeyCeremony.Trustee
 {

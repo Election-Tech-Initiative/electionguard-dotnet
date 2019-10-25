@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.KeyCeremony.Trustee
+namespace ElectionGuard.SDK.StateManagement
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct TrusteeState
