@@ -1,7 +1,11 @@
-﻿namespace ElectionGuard.SDK.IO
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace ElectionGuard.SDK.IO
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct File
     {
-        // TODO Implement C File Conversion
+        IntPtr Placeholder;
     }
 }

@@ -5,7 +5,7 @@ using ElectionGuard.SDK.KeyCeremony.Messages;
 
 namespace ElectionGuard.SDK.KeyCeremony.Trustee
 {
-    public static class TrusteeApi
+    internal static class TrusteeApi
     {
         [DllImport("electionguard", EntryPoint = "KeyCeremony_Trustee_new")]
         internal static extern NewTrusteeReturn NewTrustee(uint numberOfTrustees, uint threshold, uint index);

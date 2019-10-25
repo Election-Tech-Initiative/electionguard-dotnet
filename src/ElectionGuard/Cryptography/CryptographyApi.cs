@@ -2,7 +2,7 @@
 
 namespace ElectionGuard.SDK.Cryptography
 {
-    public static class CryptographyApi
+    internal static class CryptographyApi
     {
         [DllImport("electionguard", EntryPoint = "Crypto_parameters_new")]
         internal static extern void NewCryptographyParameters();
