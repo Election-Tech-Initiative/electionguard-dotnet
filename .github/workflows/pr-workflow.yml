@@ -20,6 +20,7 @@ jobs:
     - name: Build C Library
       working-directory: ./libs/ElectionGuard-SDK-C-Implementation
       run: |
+        cmake --version
         cmake -S . -B build -DBUILD_SHARED_LIBS=ON
         cmake --build build
     - name: Build
@@ -36,11 +37,21 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
+    - name: Install msys2
+      run: |
+        set MSYS_PATH=%CD%\temp\msys2
+        choco install msys2 --params="/InstallDir:%MSYS_PATH% /NoPath" -y
+        echo "::add-path::%MSYS_PATH%\usr\bin"
+        echo "::add-path::%MSYS_PATH%"
+    - name: Install gcc & gmp
+      run: | 
+        pacman --noconfirm -Syu
+        pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gmp make
     - name: Build C Library
       working-directory: ./libs/ElectionGuard-SDK-C-Implementation
-      if: false
       run: |
-        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
+        cmake --version
+        cmake -S . -B build -G "MSYS Makefiles" -DBUILD_SHARED_LIBS=ON
         cmake --build build
     - name: Build
       run: dotnet build
@@ -63,6 +74,7 @@ jobs:
     - name: Build C Library
       working-directory: ./libs/ElectionGuard-SDK-C-Implementation
       run: |
+        cmake --version
         cmake -S . -B build -DBUILD_SHARED_LIBS=ON
         cmake --build build
     - name: Build
