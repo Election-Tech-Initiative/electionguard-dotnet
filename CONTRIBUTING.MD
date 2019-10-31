@@ -1,10 +1,60 @@
 # Contributing
 
+* [Getting Started](#getting-started)
+* [Pull Requests](#pull-requests)
 * [Contributor License Agreement](#contributor-license-agreement)
 * [Code of Conduct](#code-of-conduct)
-* [Issues](#issues)
-* [Pull Requests](#pull-requests)
 * [Developer's Certificate of Origin 1.1](#developers-certificate-of-origin)
+
+
+## Getting Started
+
+### C-Implementation Submodule
+For each platform, the C-Implementation in the submodule must be built first.
+The instructions vary per platform.
+
+1. Initialize the submodule
+2. Navigate to `libs\ElectionGuard-SDK-C-Implementation`
+3. Follow platform specific instructions
+
+#### Linux
+
+1. Install cmake and gmp (`sudo apt-get install cmake libgmp3-dev`)
+2. `cmake -S . -B build -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `libelectionguard.so` should be created
+
+#### MacOS (.dylib)
+
+1. Install cmake and gmp (`brew install cmake gmp`)
+2. `cmake -S . -B build -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `libelectionguard.dylib` is created
+
+#### Windows (.dll)
+
+1. Install cmake and gmp ([Use Step 1 from Windows Instructions for C-Implementation](https://github.com/microsoft/ElectionGuard-SDK-C-Implementation/blob/master/README-windows.md))
+2. `cmake -S . -B build -G "MSYS Makefiles" -DBUILD_SHARED_LIBS=ON`
+3. `cmake --build build`
+4. `electionguard.dll` is created
+
+### C# Library Solution
+_Note: This build will copy the library created by the submodule build._
+
+Use Visual Studio or `dotnet build` to build.
+
+
+### Testing
+
+_Warning: Prior to testing, the submodule and the solution must be built in correct order._
+
+Use `dotnet test` to start unit tests or Visual Studio Test Explorer.
+
+## Pull Requests
+
+Before submitting a pull request, [rebase](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) your branch from master. Do not use ``git merge`` or the *merge* button provided by Github.
+
+Ensure your pull request is [referencing at least one issue](https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords) and following PR template.
 
 ## [Contributor License Agreement](https://cla.opensource.microsoft.com)
 
@@ -21,21 +71,6 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## [Issues](./doc/guides/contributing/issues.md)
-
-* [How to Contribute in Issues](./doc/guides/contributing/issues.md#how-to-contribute-in-issues)
-* [Asking for General Help](./doc/guides/contributing/issues.md#asking-for-general-help)
-* [Submitting a Bug Report](./doc/guides/contributing/issues.md#submitting-a-bug-report)
-* [Submitting a Feature Request](./doc/guides/contributing/issues.md#submitting-a-bug-report)
-* [Submitting a General Issue](./doc/guides/contributing/issues.md#submitting-a-bug-report)
-
-## [Pull Requests](./doc/guides/contributing/pull-requests.md)
-
-* [Dependencies](./doc/guides/contributing/pull-requests.md#dependencies)
-* [Setting up your local environment](./doc/guides/contributing/pull-requests.md#setting-up-your-local-environment)
-* [The Process of Making Changes](./doc/guides/contributing/pull-requests.md#the-process-of-making-changes)
-* [Reviewing Pull Requests](./doc/guides/contributing/pull-requests.md#reviewing-pull-requests)
 
 ## Developer's Certificate of Origin 1.1
 
