@@ -240,6 +240,7 @@ namespace UnitTests
         }
 
         [Test, Order(8), NonParallelizable]
+        [Ignore("Ignore until file format confirmed")]
         [Category(VotingStage)]
         public void Step08_ExportBallots()
         {
@@ -263,6 +264,7 @@ namespace UnitTests
         }
 
         [Test, Order(10), NonParallelizable]
+        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step10_TallyVotingRecords()
         {
@@ -276,6 +278,7 @@ namespace UnitTests
         }
 
         [Test, Order(11), NonParallelizable]
+        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step11_DecryptTallyShares()
         {
@@ -300,6 +303,7 @@ namespace UnitTests
         }
 
         [Test, Order(12), NonParallelizable]
+        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step12_DecryptTallyDecryptionFragments()
         {
