@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.0</TargetFramework>
 		<Company>Microsoft Corporation</Company>
-		<Product>ElectionGuard</Product>
+		<Product>ElectionGuard.SDK</Product>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Description>An open source software development kit (SDK) that makes voting more secure, transparent, accessible.</Description>
 		<Authors>Microsoft</Authors>
@@ -33,7 +33,7 @@
 	</Target>
 	<Target Name="Copy" AfterTargets="AfterBuild">
 		<ItemGroup>
-			<ElectionGuard Include="..\..\libs\electionguard\*" />
+			<ElectionGuard Pack="true" Include="..\..\libs\electionguard\*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
 	</Target>

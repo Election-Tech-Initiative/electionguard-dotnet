@@ -4,7 +4,7 @@
     <IsPackable>false</IsPackable>
     <Authors>Microsoft</Authors>
     <Company>Microsoft Corporation</Company>
-    <Product>ElectionGuard</Product>
+    <Product>ElectionGuard.SDK</Product>
     <Description>Unit tests for the ElectionGuard C# SDK Wrapper</Description>
     <Copyright>Microsoft Corporation</Copyright>
   </PropertyGroup>
