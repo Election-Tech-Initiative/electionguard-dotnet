@@ -52,7 +52,9 @@ Use `dotnet test` to start unit tests or Visual Studio Test Explorer.
 
 ## Pull Requests
 
-Before submitting a pull request, [rebase](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) your branch from master. Do not use ``git merge`` or the *merge* button provided by Github.
+Before submitting a pull request, [rebase](https://www.atlassian.com/git/tutorials/merging-vs-rebasing) your branch from master. 
+
+⚠ **Do not** use ``git merge`` or the *merge* button provided by Github.
 
 Ensure your pull request is [referencing at least one issue](https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords) and following PR template.
 

@@ -15,7 +15,7 @@ assignees: ''
 A clear and concise description of the issue.
 
 **Possible Solution**
-<!--- Only if you have suggestions on a fix for the bug -->
+<!--- Only if you have suggestions for the issue -->
 
 **Additional context/Screenshots**
 Add any other context about the problem here. If applicable, add screenshots to help explain.
