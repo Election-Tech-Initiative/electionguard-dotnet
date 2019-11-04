@@ -5,7 +5,7 @@
 		<Product>ElectionGuard</Product>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<Description>An open source software development kit (SDK) that makes voting more secure, transparent, accessible.</Description>
-		<Authors>ElectionGuard Team</Authors>
+		<Authors>Microsoft</Authors>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Copyright>Microsoft Corporation</Copyright>
 		<PackageLicenseExpression></PackageLicenseExpression>
@@ -14,20 +14,27 @@
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 	<ItemGroup>
-		<LinuxLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.so" />
-		<MacOSLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dylib" />
-		<WindowsLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dll" />
-	</ItemGroup>
-	<ItemGroup>
 	  <None Include="..\..\LICENSE">
 	    <Pack>True</Pack>
 	    <PackagePath></PackagePath>
 	  </None>
 	</ItemGroup>
-  <Target Name="CopyLibraries" AfterTargets="AfterBuild">
-	  <Copy SourceFiles="@(LinuxLibrary)" DestinationFolder="$(OutDir)" />
-	  <Copy SourceFiles="@(MacOSLibrary)" DestinationFolder="$(OutDir)" />
-	  <Copy SourceFiles="@(WindowsLibrary)" DestinationFolder="$(OutDir)" />
-  </Target>
-
+	<Target Name="Windows_Debug" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
+		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;"/>
+	</Target>
+	<Target Name="Windows_Release" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\download-latest.ps1\&quot;; }&quot;"/>
+	</Target>
+	<Target Name="Unix_Debug" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT' ">
+		<Exec Command="$(ProjectDir)..\..\scripts\migrate-local.sh"/>
+	</Target>
+	<Target Name="Unix_Release" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT' ">
+		<Exec Command="$(ProjectDir)..\..\scripts\download-latest.sh"/>
+	</Target>
+	<Target Name="Copy" AfterTargets="AfterBuild">
+		<ItemGroup>
+			<ElectionGuard Include="..\..\libs\electionguard\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
+	</Target>
 </Project>
