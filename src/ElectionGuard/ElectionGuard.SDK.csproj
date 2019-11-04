@@ -1,11 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<Company>Microsoft Corporation</Company>
+		<Product>ElectionGuard</Product>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<Description>An open source software development kit (SDK) that makes voting more secure, transparent, accessible.</Description>
+		<Authors>ElectionGuard Team</Authors>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Copyright>Microsoft Corporation</Copyright>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/microsoft/ElectionGuard-SDK-CSharp.git</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/microsoft/ElectionGuard-SDK</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 	<ItemGroup>
 		<LinuxLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.so" />
 		<MacOSLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dylib" />
 		<WindowsLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dll" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="..\..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
   <Target Name="CopyLibraries" AfterTargets="AfterBuild">
 	  <Copy SourceFiles="@(LinuxLibrary)" DestinationFolder="$(OutDir)" />
