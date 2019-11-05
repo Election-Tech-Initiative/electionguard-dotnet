@@ -12,10 +12,12 @@ jobs:
         submodules: true
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
+    - name: Configure Nuget
+      run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: Build
       run: dotnet build -c Release
     - name: Test
-      if: false # Disabled due MacOS agent issues
+      if: false # Disabled
       run: dotnet test -c Release
     - name: Package
       run: dotnet pack -c Release
@@ -36,6 +38,8 @@ jobs:
       run: | 
         pacman --noconfirm -Syu
         pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gmp make
+    - name: Configure Nuget
+      run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: Build
       run: dotnet build -c Release
     - name: Test
@@ -55,10 +59,12 @@ jobs:
       run: brew cask install dotnet-sdk
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
+    - name: Configure Nuget
+      run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: Build
       run: dotnet build -c Release
     - name: Test
-      if: false # Disabled due MacOS agent issues
+      if: false # Disabled
       run: dotnet test -c Release
     - name: Package
       run: dotnet pack -c Release
