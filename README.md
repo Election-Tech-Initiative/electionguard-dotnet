@@ -1,5 +1,15 @@
 
-# ElectionGuard CSharp
+# 🗳️ ElectionGuard SDK C#
+
+![build](https://github.com/microsoft/ElectionGuard-SDK-CSharp/workflows/Build/badge.svg)
+[![nuget](https://img.shields.io/nuget/dt/ElectionGuard-SDK-CSharp)]()
+[![license](https://img.shields.io/github/license/microsoft/ElectionGuard-SDK-CSharp)](.License)
+
+This is a C# wrapper for the core SDK that performs election functions such as vote encryption, decryption, key generation, and tallying. This code is meant to be run on voting system hardware and to be integrated into existing (or new) voting system software. The ElectionGuard SDK is meant to add end-to-end verifiability and encryption into 3rd party comprehensive voting systems. 
+
+This repository is pre-release. We look forward to engaging with the elections, security, and software engineering communities to continue to improve it as we move towards a full release.
+
+**This project is bound by a [Code of Conduct][].**
 
 ## Building
 
@@ -46,15 +56,7 @@ Use `dotnet test` to start unit tests or Visual Studio Test Explorer.
 
 
 ## Contributing
+Help defend democracy and **[contribute to the project][]**.
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+[Code of Conduct]: CODE_OF_CONDUCT.md
+[Contribute to the project]: CONTRIBUTING.md
