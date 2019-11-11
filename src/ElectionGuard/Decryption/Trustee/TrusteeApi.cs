@@ -2,6 +2,8 @@
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Decryption.Messages;
 using ElectionGuard.SDK.IO;
+using ElectionGuard.SDK.KeyCeremony;
+using ElectionGuard.SDK.Serialization;
 using ElectionGuard.SDK.StateManagement;
 
 namespace ElectionGuard.SDK.Decryption.Trustee
@@ -22,5 +24,21 @@ namespace ElectionGuard.SDK.Decryption.Trustee
 
         [DllImport("electionguard", EntryPoint = "Decryption_Trustee_compute_fragments")]
         internal static extern ComputeFragmentsReturn ComputeFragments(UIntPtr trustee, DecryptionFragmentsRequest fragmentsRequest);
+
+        internal static TrusteeState NewTrusteeState(TrusteeStateExport trusteeStateExport)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(trusteeStateExport.Length);
+            Marshal.Copy(TrusteeStateSerializer.Serialize(trusteeStateExport), 0, unmanagedPointer, trusteeStateExport.Length);
+            return new TrusteeState()
+            {
+                Length = trusteeStateExport.Length,
+                Bytes = unmanagedPointer,
+            };
+        }
+
+        internal static void FreeTrusteeState(TrusteeState trusteeState)
+        {
+            Marshal.FreeHGlobal(trusteeState.Bytes);
+        }
     }
 }

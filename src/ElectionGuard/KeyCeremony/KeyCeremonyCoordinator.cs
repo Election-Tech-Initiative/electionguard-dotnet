@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.KeyCeremony.Coordinator;
 using ElectionGuard.SDK.KeyCeremony.Messages;
+using ElectionGuard.SDK.Serialization;
 using ElectionGuard.SDK.Utility;
 
 namespace ElectionGuard.SDK.KeyCeremony
@@ -53,12 +54,14 @@ namespace ElectionGuard.SDK.KeyCeremony
             return Protect(_coordinator, () => CoordinatorApi.PublishJointKey(_coordinator));
         }
 
-        public string GetPublishedJointKey()
+        public JointPublicKeyResponse GetPublishedJointKey(PublishJointKeyReturn publishJointKeyReturn)
         {
-            var publishJointKey = PublishJointKey().Key;
-            var jointKey = new byte[publishJointKey.Length];
-            Marshal.Copy(publishJointKey.Bytes, jointKey, 0, (int)publishJointKey.Length);
-            return BitConverter.ToString(jointKey);
+            if (publishJointKeyReturn.Status != CoordinatorStatus.Success)
+            {
+                throw new Exception("Failed to get published joint key");
+            }
+            var key = CoordinatorApi.GetPublishedJointKey(publishJointKeyReturn);
+            return JointKeySerializer.Deserialize(key);
         }
 
         public void Dispose()

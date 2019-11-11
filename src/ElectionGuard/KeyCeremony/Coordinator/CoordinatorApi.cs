@@ -30,5 +30,12 @@ namespace ElectionGuard.SDK.KeyCeremony.Coordinator
 
         [DllImport("electionguard", EntryPoint = "KeyCeremony_Coordinator_publish_joint_key")]
         internal static extern PublishJointKeyReturn PublishJointKey(UIntPtr coordinator);
+
+        internal static byte[] GetPublishedJointKey(PublishJointKeyReturn publishJointKeyReturn)
+        {
+            var key = new byte[publishJointKeyReturn.Key.Length];
+            Marshal.Copy(publishJointKeyReturn.Key.Bytes, key, 0, (int)publishJointKeyReturn.Key.Length);
+            return key;
+        }
     }
 }

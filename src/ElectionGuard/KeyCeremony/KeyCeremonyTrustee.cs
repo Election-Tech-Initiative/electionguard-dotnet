@@ -2,6 +2,8 @@
 using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.KeyCeremony.Messages;
 using ElectionGuard.SDK.KeyCeremony.Trustee;
+using ElectionGuard.SDK.Serialization;
+using ElectionGuard.SDK.StateManagement;
 using ElectionGuard.SDK.Utility;
 
 namespace ElectionGuard.SDK.KeyCeremony
@@ -9,9 +11,11 @@ namespace ElectionGuard.SDK.KeyCeremony
     public class KeyCeremonyTrustee : SafePointer, IDisposable
     {
         private readonly UIntPtr _trustee;
+        private readonly int _numberOfTrustees;
 
         public KeyCeremonyTrustee(uint numberOfTrustees, uint threshold, uint index)
         {
+            _numberOfTrustees = (int) numberOfTrustees;
             var response = TrusteeApi.NewTrustee(numberOfTrustees, threshold, index);
             if (response.Status == TrusteeStatus.Success)
             {
@@ -45,6 +49,16 @@ namespace ElectionGuard.SDK.KeyCeremony
         public ExportStateReturn ExportState()
         {
             return Protect(_trustee, () => TrusteeApi.ExportState(_trustee));
+        }
+
+        public TrusteeStateExport GetExportedState(ExportStateReturn exportStateReturn)
+        {
+            if (exportStateReturn.Status != TrusteeStatus.Success)
+            {
+                throw new Exception("Failed to export trustee state");
+            }
+            var state = TrusteeApi.GetExportedState(exportStateReturn);
+            return TrusteeStateSerializer.Deserialize(state, _numberOfTrustees);
         }
 
         public void Dispose()
