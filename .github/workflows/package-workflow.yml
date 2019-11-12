@@ -17,6 +17,8 @@ jobs:
     - name: Configure Package Registry
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: Build and Package
-      run: dotnet build -c Release --version-suffix "${${{ github.sha }}:0:7}"
+      run:  |
+        commit="${{ github.sha }}"
+        dotnet build -c Release --version-suffix "${commit:0:7}"
     - name: Push
       run: dotnet nuget push src/ElectionGuard/bin/Release/*.nupkg --source "github"

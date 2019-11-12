@@ -15,7 +15,9 @@ jobs:
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: Build and Package
-      run: dotnet build -c Release --version-suffix "${${{ github.sha }}:0:7}"
+      run: |
+        commit="${{ github.sha }}"
+        dotnet build -c Release --version-suffix "${commit:0:7}"
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -39,7 +41,7 @@ jobs:
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: Build and Package
-      run: dotnet build -c Release --version-suffix (${{ github.sha }}.Substring(0,7))
+      run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7))
     - name: Test
       run: dotnet test -c Release
   macos_build:
@@ -58,7 +60,9 @@ jobs:
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: Build and Package
-      run: dotnet build -c Release --version-suffix "${${{ github.sha }}:0:7}"
+      run:  |
+        commit="${{ github.sha }}"
+        dotnet build -c Release --version-suffix "${commit:0:7}"
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
