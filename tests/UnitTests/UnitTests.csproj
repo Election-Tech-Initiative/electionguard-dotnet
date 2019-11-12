@@ -2,9 +2,9 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <Authors>ElectionGuard Team</Authors>
+    <Authors>Microsoft</Authors>
     <Company>Microsoft Corporation</Company>
-    <Product>ElectionGuard</Product>
+    <Product>ElectionGuard.SDK</Product>
     <Description>Unit tests for the ElectionGuard C# SDK Wrapper</Description>
     <Copyright>Microsoft Corporation</Copyright>
   </PropertyGroup>
@@ -17,14 +17,22 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ElectionGuard\ElectionGuard.SDK.csproj" />
   </ItemGroup>
-	<ItemGroup>
-		<LinuxLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.so" />
-		<MacOSLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dylib" />
-		<WindowsLibrary Include="..\..\libs\ElectionGuard-SDK-C-Implementation\build\*.dll" />
-	</ItemGroup>
-	<Target Name="CopyLibraries" AfterTargets="AfterBuild">
-		<Copy SourceFiles="@(LinuxLibrary)" DestinationFolder="$(OutDir)" />
-		<Copy SourceFiles="@(MacOSLibrary)" DestinationFolder="$(OutDir)" />
-		<Copy SourceFiles="@(WindowsLibrary)" DestinationFolder="$(OutDir)" />
+	<Target Name="Windows_Debug" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
+		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;"/>
+	</Target>
+	<Target Name="Windows_Release" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\download-latest.ps1\&quot;; }&quot;"/>
+	</Target>
+	<Target Name="Unix_Debug" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT' ">
+		<Exec Command="$(ProjectDir)..\..\scripts\migrate-local.sh"/>
+	</Target>
+	<Target Name="Unix_Release" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT' ">
+		<Exec Command="$(ProjectDir)..\..\scripts\download-latest.sh"/>
+	</Target>
+	<Target Name="Copy" AfterTargets="AfterBuild">
+		<ItemGroup>
+			<ElectionGuard Include="..\..\libs\electionguard\*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
 	</Target>
 </Project>
