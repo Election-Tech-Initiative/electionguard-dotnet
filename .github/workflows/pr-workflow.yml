@@ -10,26 +10,17 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Upgrade cmake
-      run: | 
-        sudo mv /usr/local/bin/cmake /usr/local/bin/cmake-old
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8611B7A28669BB93
-        sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
-        sudo apt-get update && sudo apt-get install -y cmake
-        cmake --version
-    - name: Build C Library
-      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
-      run: |
-        cmake --version
-        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
-        cmake --build build
+    - name: Setup Commands
+      run: chmod +x ./scripts/download-latest.sh
+    - name: Configure Nuget
+      run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: Build
-      run: dotnet build
+      run: dotnet build -c Release
     - name: Test
-      if: false
-      run: dotnet test
+      if: false # Disabled
+      run: dotnet test -c Release
     - name: Package
-      run: dotnet pack
+      run: dotnet pack -c Release
   windows_build:
     name: 'Windows Build'
     runs-on: 'windows-latest'
@@ -47,19 +38,14 @@ jobs:
       run: | 
         pacman --noconfirm -Syu
         pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gmp make
-    - name: Build C Library
-      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
-      run: |
-        cmake --version
-        cmake -S . -B build -G "MSYS Makefiles" -DBUILD_SHARED_LIBS=ON
-        cmake --build build
+    - name: Configure Nuget
+      run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: Build
-      run: dotnet build
+      run: dotnet build -c Release
     - name: Test
-      if: false
-      run: dotnet test
+      run: dotnet test -c Release
     - name: Package
-      run: dotnet pack
+      run: dotnet pack -c Release
   macos_build:
     name: 'MacOS Build'
     runs-on: 'macOS-latest'
@@ -71,16 +57,14 @@ jobs:
       run: brew install gmp
     - name: Upgrade dotnet core sdk
       run: brew cask install dotnet-sdk
-    - name: Build C Library
-      working-directory: ./libs/ElectionGuard-SDK-C-Implementation
-      run: |
-        cmake --version
-        cmake -S . -B build -DBUILD_SHARED_LIBS=ON
-        cmake --build build
+    - name: Setup Commands
+      run: chmod +x ./scripts/download-latest.sh
+    - name: Configure Nuget
+      run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: Build
-      run: dotnet build
+      run: dotnet build -c Release
     - name: Test
-      if: false
-      run: dotnet test
+      if: false # Disabled
+      run: dotnet test -c Release
     - name: Package
-      run: dotnet pack
+      run: dotnet pack -c Release

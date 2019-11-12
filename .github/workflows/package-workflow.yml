@@ -1,0 +1,24 @@
+name: Package
+
+on:
+   milestone:
+     types: [closed]
+
+jobs:
+  linux_package:
+    name: 'Linux'
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+    - name: Setup Commands
+      run: chmod +x ./scripts/download-latest.sh
+    - name: Configure Package Registry
+      run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
+    - name: Build
+      run: dotnet build -c Release
+    - name: Package
+      run: dotnet pack -c Release
+    - name: Push
+      run: dotnet nuget push src/ElectionGuard/bin/Release/*.nupkg --source "github"
