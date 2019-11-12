@@ -43,6 +43,7 @@ jobs:
     - name: Build
       run: dotnet build -c Release
     - name: Test
+      if: false # Disabled
       run: dotnet test -c Release
     - name: Package
       run: dotnet pack -c Release
