@@ -12,12 +12,25 @@
 		<RepositoryUrl>https://github.com/microsoft/ElectionGuard-SDK-CSharp.git</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/microsoft/ElectionGuard-SDK</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
+		<VersionPrefix>1.0.0</VersionPrefix>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Include="..\..\LICENSE">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\libs\electionguard\*.dll">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\win\native</PackagePath>
+		</None>
+		<None Include="..\..\libs\electionguard\*.so">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\linux\native</PackagePath>
+		</None>
+		<None Include="..\..\libs\electionguard\*.dylib">
+			<Pack>true</Pack>
+			<PackagePath>runtimes\osx\native</PackagePath>
+		</None>
 	</ItemGroup>
 	<Target Name="Windows_Debug" AfterTargets="BeforeBuild"  Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
 		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;"/>
@@ -33,7 +46,7 @@
 	</Target>
 	<Target Name="Copy" AfterTargets="AfterBuild">
 		<ItemGroup>
-			<ElectionGuard Pack="true" Include="..\..\libs\electionguard\*" />
+			<ElectionGuard Include="..\..\libs\electionguard\*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
 	</Target>
