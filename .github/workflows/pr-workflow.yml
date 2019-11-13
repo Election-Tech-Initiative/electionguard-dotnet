@@ -53,5 +53,5 @@ jobs:
         commit="${{ github.sha }}"
         dotnet build -c Release --version-suffix "${commit:0:7}"
     - name: Test
-      if: false # Disabled
+      if:
       run: dotnet test -c Release
