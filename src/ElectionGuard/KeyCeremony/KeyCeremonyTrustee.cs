@@ -13,10 +13,10 @@ namespace ElectionGuard.SDK.KeyCeremony
         private readonly UIntPtr _trustee;
         private readonly int _numberOfTrustees;
 
-        public KeyCeremonyTrustee(uint numberOfTrustees, uint threshold, uint index)
+        public KeyCeremonyTrustee(int numberOfTrustees, int threshold, int index)
         {
-            _numberOfTrustees = (int) numberOfTrustees;
-            var response = TrusteeApi.NewTrustee(numberOfTrustees, threshold, index);
+            _numberOfTrustees = numberOfTrustees;
+            var response = TrusteeApi.NewTrustee(Convert.ToUInt32(numberOfTrustees), Convert.ToUInt32(threshold), Convert.ToUInt32(index));
             if (response.Status == TrusteeStatus.Success)
             {
                 _trustee = response.Trustee;

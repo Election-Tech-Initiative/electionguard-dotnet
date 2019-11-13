@@ -10,9 +10,9 @@ namespace ElectionGuard.SDK.Decryption
     {
         private readonly UIntPtr _coordinator;
 
-        public DecryptionCoordinator(uint numberOfTrustees, uint threshold)
+        public DecryptionCoordinator(int numberOfTrustees, int threshold)
         {
-            var response = CoordinatorApi.NewCoordinator(numberOfTrustees, threshold);
+            var response = CoordinatorApi.NewCoordinator(Convert.ToUInt32(numberOfTrustees), Convert.ToUInt32(threshold));
             if (response.Status == CoordinatorStatus.Success)
             {
                 _coordinator = response.Coordinator;
