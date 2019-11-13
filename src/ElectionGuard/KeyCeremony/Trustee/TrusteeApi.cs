@@ -24,5 +24,12 @@ namespace ElectionGuard.SDK.KeyCeremony.Trustee
 
         [DllImport("electionguard", EntryPoint = "KeyCeremony_Trustee_export_state")]
         internal static extern ExportStateReturn ExportState(UIntPtr trustee);
+
+        internal static byte[] GetExportedState(ExportStateReturn exportStateReturn)
+        {
+            var state = new byte[exportStateReturn.State.Length];
+            Marshal.Copy(exportStateReturn.State.Bytes, state, 0, (int)exportStateReturn.State.Length);
+            return state;
+        }
     }
 }
