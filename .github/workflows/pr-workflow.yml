@@ -43,6 +43,7 @@ jobs:
     - name: Build and Package
       run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7))
     - name: Test
+      if: false # Disabled
       run: dotnet test -c Release
   macos_build:
     name: 'MacOS Build'
