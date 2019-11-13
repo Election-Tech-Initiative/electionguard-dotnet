@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Cryptography;
+using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.Utility;
 using ElectionGuard.SDK.Voting.Encrypter;
 
@@ -8,10 +8,22 @@ namespace ElectionGuard.SDK.Voting
 {
     public class VotingEncrypter : SafePointer, IDisposable
     {
-        private readonly UIntPtr _encrypter;
-        private readonly UniqueIdentifier _uniqueIdentifier;
+        private UIntPtr _encrypter;
+        private UniqueIdentifier _uniqueIdentifier;
+
+        public VotingEncrypter(JointPublicKeyResponse jointKeyResponse, uint numberOfSelections, byte[] byteHash)
+        {
+            var jointKey = EncrypterApi.NewJointPublicKey(jointKeyResponse);
+            Initialize(jointKey, numberOfSelections, byteHash);
+            EncrypterApi.FreeJointPublicKey(jointKey);
+        }
 
         public VotingEncrypter(JointPublicKey jointKey, uint numberOfSelections, byte[] byteHash)
+        {
+           Initialize(jointKey, numberOfSelections, byteHash);
+        }
+
+        private void Initialize(JointPublicKey jointKey, uint numberOfSelections, byte[] byteHash)
         {
             if (byteHash.Length > CryptographySettings.HashDigestSizeBytes)
             {
@@ -30,8 +42,6 @@ namespace ElectionGuard.SDK.Voting
                 throw new Exception("Failed to create voting encrypter");
             }
         }
-
-
 
         public EncryptBallotReturn EncryptBallot(bool[] selections)
         {

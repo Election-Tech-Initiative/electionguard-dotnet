@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Cryptography;
@@ -39,8 +37,8 @@ namespace UnitTests
         private List<KeyCeremonyTrustee> _keyCeremonyTrustees;
         private AllKeysReceivedMessage _allKeysReceivedMessage;
         private AllSharesReceivedMessage _allSharesReceivedMessage;
-        private List<TrusteeState> _trusteeStates;
-        private JointPublicKey _jointKey;
+        private List<TrusteeStateExport> _trusteeStateExports;
+        private JointPublicKeyResponse _jointKey;
 
         // Voting
         private const string VotingStage = "Voting";
@@ -96,7 +94,7 @@ namespace UnitTests
         {
             _keyCeremonyCoordinator = new KeyCeremonyCoordinator(_numberOfTrustees, _threshold);
             _keyCeremonyTrustees = new List<KeyCeremonyTrustee>();
-            _trusteeStates = new List<TrusteeState>();
+            _trusteeStateExports = new List<TrusteeStateExport>();
             for (uint i = 0; i < _numberOfTrustees; i++)
             {
                 _keyCeremonyTrustees.Add(new KeyCeremonyTrustee(_numberOfTrustees, _threshold, i));
@@ -168,10 +166,9 @@ namespace UnitTests
             var publishJointKeyReturn = _keyCeremonyCoordinator.PublishJointKey();
             Assert.AreEqual(KeyCeremonyCoordinatorStatus.Success, publishJointKeyReturn.Status);
 
-            _jointKey = publishJointKeyReturn.Key;
-            var jointKey = new byte[_jointKey.Length];
-            Marshal.Copy(_jointKey.Bytes, jointKey, 0, (int)_jointKey.Length);
-            TestContext.WriteLine($"Joint Key: {BitConverter.ToString(jointKey)}");
+            _jointKey = _keyCeremonyCoordinator.GetPublishedJointKey(publishJointKeyReturn);
+            TestContext.WriteLine($"Number Of Trustees:  {_jointKey.NumberOfTrustees}");
+            TestContext.WriteLine($"Joint Key (Base64): {_jointKey.Base64}");
         }
 
         [Test, Order(5), NonParallelizable]
@@ -182,13 +179,12 @@ namespace UnitTests
             {
                 var exportStateReturn = trustee.ExportState();
                 Assert.AreEqual(KeyCeremonyTrusteeStatus.Success, exportStateReturn.Status);
-
-                _trusteeStates.Add(exportStateReturn.State);
-                var state = new byte[exportStateReturn.State.Length];
-                Marshal.Copy(exportStateReturn.State.Bytes, state, 0, (int)exportStateReturn.State.Length);
-                TestContext.WriteLine($"Trustee State: {BitConverter.ToString(state)}");
+                var state = trustee.GetExportedState(exportStateReturn);
+                _trusteeStateExports.Add(state);
+                TestContext.WriteLine($"Trustee Index: {state.Index}");
+                TestContext.WriteLine($"Trustee State(Base64): {state.Base64}");
             }
-            Assert.AreEqual(_numberOfTrustees, _trusteeStates.Count);
+            Assert.AreEqual(_numberOfTrustees, _trusteeStateExports.Count);
         }
 
         [Test, Order(6), NonParallelizable]
@@ -240,7 +236,6 @@ namespace UnitTests
         }
 
         [Test, Order(8), NonParallelizable]
-        [Ignore("Ignore until file format confirmed")]
         [Category(VotingStage)]
         public void Step08_ExportBallots()
         {
@@ -255,16 +250,15 @@ namespace UnitTests
         {
             _decryptionCoordinator = new DecryptionCoordinator(_numberOfTrustees, _threshold);
             _decryptionTrustees = new List<DecryptionTrustee>();
-            foreach(var trusteeState in _trusteeStates)
+            foreach(var trusteeStateExport in _trusteeStateExports)
             {
-                _decryptionTrustees.Add(new DecryptionTrustee(_numberOfTrustees, _threshold, _numberOfSelections, trusteeState, _baseHashCode));
+                _decryptionTrustees.Add(new DecryptionTrustee(_numberOfTrustees, _threshold, _numberOfSelections, trusteeStateExport, _baseHashCode));
             }
             Assert.NotNull(_decryptionCoordinator);
             Assert.AreEqual(_numberOfTrustees, _decryptionTrustees.Count);
         }
 
         [Test, Order(10), NonParallelizable]
-        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step10_TallyVotingRecords()
         {
@@ -278,7 +272,6 @@ namespace UnitTests
         }
 
         [Test, Order(11), NonParallelizable]
-        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step11_DecryptTallyShares()
         {
@@ -303,7 +296,6 @@ namespace UnitTests
         }
 
         [Test, Order(12), NonParallelizable]
-        [Ignore("Ignore until file format confirmed")]
         [Category(DecryptionStage)]
         public void Step12_DecryptTallyDecryptionFragments()
         {
@@ -324,7 +316,6 @@ namespace UnitTests
             Assert.AreEqual(DecryptionCoordinatorStatus.Success, allFragmentsReceivedStatus);
             FileTools.CloseFile(tallyFile);
         }
-
 
         [OneTimeTearDown]
         public void OneTimeTearDown()

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Cryptography;
+using ElectionGuard.SDK.KeyCeremony;
+using ElectionGuard.SDK.Serialization;
 
 namespace ElectionGuard.SDK.Voting.Encrypter
 {
@@ -30,6 +32,22 @@ namespace ElectionGuard.SDK.Voting.Encrypter
         internal static void FreeUniqueIdentifier(IntPtr uniqueIdentifier)
         {
             Marshal.FreeHGlobal(uniqueIdentifier);
+        }
+
+        internal static JointPublicKey NewJointPublicKey(JointPublicKeyResponse jointPublicKeyResponse)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(jointPublicKeyResponse.Length);
+            Marshal.Copy(JointKeySerializer.Serialize(jointPublicKeyResponse), 0, unmanagedPointer, jointPublicKeyResponse.Length);
+            return new JointPublicKey()
+            {
+                Length = jointPublicKeyResponse.Length,
+                Bytes = unmanagedPointer,
+            };
+        }
+
+        internal static void FreeJointPublicKey(JointPublicKey jointPublicKey)
+        {
+            Marshal.FreeHGlobal(jointPublicKey.Bytes);
         }
     }
 }
