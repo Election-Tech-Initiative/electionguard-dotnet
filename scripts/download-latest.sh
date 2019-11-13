@@ -6,7 +6,7 @@ FILE="electionguard.zip"
 RELEASES="https://api.github.com/repos/$REPO/releases"
 
 echo "Determining latest release"
-TAG=$(curl --silent "$RELEASES" | grep -Po '"tag_name": "\K.*?(?=")')
+TAG=$(curl --silent "$RELEASES" | grep -Pom1 '"tag_name": "\K.*?(?=")')
 
 DOWNLOAD="https://github.com/$REPO/releases/download/$TAG/$FILE"
 NAME="electionguard"

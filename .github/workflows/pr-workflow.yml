@@ -28,22 +28,12 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Install msys2
-      run: |
-        set MSYS_PATH=%CD%\temp\msys2
-        choco install msys2 --params="/InstallDir:%MSYS_PATH% /NoPath" -y
-        echo "::add-path::%MSYS_PATH%\usr\bin"
-        echo "::add-path::%MSYS_PATH%"
-    - name: Install gcc & gmp
-      run: | 
-        pacman --noconfirm -Syu
-        pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-gmp make
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: Build and Package
       run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7))
     - name: Test
-      if: false # Disabled
+      if:
       run: dotnet test -c Release
   macos_build:
     name: 'MacOS Build'
@@ -52,8 +42,6 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Install gmp
-      run: brew install gmp
     - name: Upgrade dotnet core sdk
       run: brew cask install dotnet-sdk
     - name: Setup Commands
