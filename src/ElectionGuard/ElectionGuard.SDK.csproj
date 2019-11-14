@@ -20,15 +20,15 @@
 			<PackagePath></PackagePath>
 		</None>
 		<None Include="..\..\libs\electionguard\*.dll">
-			<Pack>true</Pack>
+			<Pack>True</Pack>
 			<PackagePath>runtimes\win\native</PackagePath>
 		</None>
 		<None Include="..\..\libs\electionguard\*.so">
-			<Pack>true</Pack>
+			<Pack>True</Pack>
 			<PackagePath>runtimes\linux\native</PackagePath>
 		</None>
 		<None Include="..\..\libs\electionguard\*.dylib">
-			<Pack>true</Pack>
+			<Pack>True</Pack>
 			<PackagePath>runtimes\osx\native</PackagePath>
 		</None>
 	</ItemGroup>
