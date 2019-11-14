@@ -18,6 +18,10 @@ jobs:
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: DotNet Info
       run: dotnet --info
+    - name: DotNet Nuget Version
+      run: dotnet nuget --version
+    - name: DotNet Nuget Locals Ingo
+      run: dotnet nuget locals all --list
     - name: Build
       run: dotnet build -c Release
     - name: Test
@@ -48,6 +52,10 @@ jobs:
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: DotNet Info
       run: dotnet --info
+    - name: DotNet Nuget Version
+      run: dotnet nuget --version
+    - name: DotNet Nuget Locals Ingo
+      run: dotnet nuget locals all --list
     - name: Build
       run: dotnet build -c Release
     - name: Test
@@ -82,6 +90,10 @@ jobs:
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: DotNet Info
       run: dotnet --info
+    - name: DotNet Nuget Version
+      run: dotnet nuget --version
+    - name: DotNet Nuget Locals Ingo
+      run: dotnet nuget locals all --list
     - name: Build
       run: dotnet build -c Release
     - name: Test
