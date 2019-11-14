@@ -17,10 +17,5 @@ jobs:
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: Build and Package
       run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7))
-    - name: Add nuget source
-      run: |
-        nuget sources Add -Name "github" \
-        -Source "https://nuget.pkg.github.com/microsoft/index.json" \
-        -UserName microsoft -Password ${{ secrets.GITHUB_TOKEN }}
     - name: Push
-      run: nuget push src/ElectionGuard/bin/Release/*.nupkg --source "github"
+      run: dotnet nuget push src/ElectionGuard/bin/Release/*.nupkg
