@@ -19,12 +19,14 @@ jobs:
     - name: DotNet Info
       run: dotnet --info
     - name: Build
-      run: |
-        commit="${{ github.sha }}"
-        dotnet build -c Release
+      run: dotnet build -c Release
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
+    - name: Package
+      run: |
+        commit="${{ github.sha }}"
+        dotnet pack -c Release
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v1
       with:
@@ -43,11 +45,15 @@ jobs:
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: DotNet Info
       run: dotnet --info
-    - name: Build and Package
+    - name: Build
       run: dotnet build -c Release
     - name: Test
-      if: false
+      if:
       run: dotnet test -c Release
+    - name: Package
+      run: |
+        commit="${{ github.sha }}"
+        dotnet pack -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
       with:
@@ -70,13 +76,15 @@ jobs:
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: DotNet Info
       run: dotnet --info
-    - name: Build and Package
-      run:  |
-        commit="${{ github.sha }}"
-        dotnet build -c Release
+    - name: Build
+      run: dotnet build -c Release
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
+    - name: Package
+      run: |
+        commit="${{ github.sha }}"
+        dotnet pack -c Release
     - name: Upload MacOS artifacts
       uses: actions/upload-artifact@v1
       with:
