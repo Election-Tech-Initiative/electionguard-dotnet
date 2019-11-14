@@ -19,21 +19,18 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
-		<Content Include="..\..\libs\electionguard\*.dll">
+		<None Include="..\..\libs\electionguard\*.dll">
 			<Pack>true</Pack>
 			<PackagePath>runtimes\win\native</PackagePath>
-      		<Visible>false</Visible>
-		</Content>
-		<Content Include="..\..\libs\electionguard\*.so">
+		</None>
+		<None Include="..\..\libs\electionguard\*.so">
 			<Pack>true</Pack>
 			<PackagePath>runtimes\linux\native</PackagePath>
-      		<Visible>false</Visible>
-		</Content >
-		<Content Include="..\..\libs\electionguard\*.dylib">
+		</None>
+		<None Include="..\..\libs\electionguard\*.dylib">
 			<Pack>true</Pack>
 			<PackagePath>runtimes\osx\native</PackagePath>
-      		<Visible>false</Visible>
-		</Content>
+		</None>
 	</ItemGroup>
 	<Target Name="Windows_Debug" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
 		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;" />
