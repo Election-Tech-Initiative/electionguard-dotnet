@@ -10,10 +10,10 @@ echo "Determining latest release"
 #   It is not necessary on local machines, because the request will go through as unauthenticated if
 #   token is not provided. Github allows 60 unauthenticated per hour per originating IP address.
 #   https://developer.github.com/v3/#rate-limiting
-RELEASES_REQUEST="curl --silent --url ""$RELEASES"" --header 'Authorization: token $GITHUB_TOKEN'"
+RELEASES_REQUEST="curl -i --silent --url ""$RELEASES"" --header 'Authorization: token $GITHUB_TOKEN'"
 # Uncomment lines below if we need to debug the response
-# RELEASES_RESPONSE=$($RELEASES_REQUEST)
-# echo "Latest release response JSON: $RELEASES_RESPONSE"
+RELEASES_RESPONSE=$($RELEASES_REQUEST)
+echo "Latest release response JSON: $RELEASES_RESPONSE"
 TAG=$($RELEASES_REQUEST | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 echo "Latest release tag found: $TAG"
 
