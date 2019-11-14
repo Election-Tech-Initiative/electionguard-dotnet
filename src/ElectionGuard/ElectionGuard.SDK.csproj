@@ -49,5 +49,6 @@
 			<ElectionGuard Include="..\..\libs\electionguard\*" />
 		</ItemGroup>
 		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
+		<Copy SourceFiles="..\..\libs\electionguard\*.dylib" DestinationFolder="$(OutDir)runtimes\osx\native" />
 	</Target>
 </Project>
