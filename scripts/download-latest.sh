@@ -7,8 +7,8 @@ RELEASES="https://api.github.com/repos/$REPO/releases"
 
 echo "Determining latest release"
 RELEASES_REQUEST="curl --silent --url ""$RELEASES"" --header 'authorization: Bearer $GITHUB_TOKEN'"
-RELEASES_RESPONSE=$($RELEASES_REQUEST)
-# Uncomment echo statement below if we need to debug the response
+# Uncomment lines below if we need to debug the response
+# RELEASES_RESPONSE=$($RELEASES_REQUEST)
 # echo "Latest release response JSON: $RELEASES_RESPONSE"
 TAG=$($RELEASES_REQUEST | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 echo "Latest release tag found: $TAG"
@@ -36,9 +36,9 @@ echo "Validating library directory"
 mkdir -p $LIB_PATH
 
 echo "Move release files to library"
-mv -f $DIR/$DLL/$DLL "$LIB_PATH/$DLL"
-mv -f $DIR/$SO/$SO $LIB_PATH/$SO
-mv -f $DIR/$DYLIB/$DYLIB $LIB_PATH/$DYLIB
+mv -f -v $DIR/$DLL/$DLL "$LIB_PATH/$DLL"
+mv -f -v $DIR/$SO/$SO $LIB_PATH/$SO
+mv -f -v $DIR/$DYLIB/$DYLIB $LIB_PATH/$DYLIB
 
 echo "Deleting temp files"
 rm -rf -v $ZIP
