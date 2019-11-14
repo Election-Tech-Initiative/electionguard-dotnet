@@ -16,9 +16,9 @@ jobs:
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
-    - name: DotNet Version
-      run: dotnet --version
-    - name: Build and Package
+    - name: DotNet Info
+      run: dotnet --info
+    - name: Build
       run: |
         commit="${{ github.sha }}"
         dotnet build -c Release
@@ -41,8 +41,8 @@ jobs:
         submodules: true
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
-    - name: DotNet Version
-      run: dotnet --version
+    - name: DotNet Info
+      run: dotnet --info
     - name: Build and Package
       run: dotnet build -c Release
     - name: Test
@@ -68,8 +68,8 @@ jobs:
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
-    - name: DotNet Version
-      run: dotnet --version
+    - name: DotNet Info
+      run: dotnet --info
     - name: Build and Package
       run:  |
         commit="${{ github.sha }}"
