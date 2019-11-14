@@ -24,14 +24,17 @@ jobs:
       if: false # Disabled
       run: dotnet test -c Release
     - name: Package
-      run: |
-        commit="${{ github.sha }}"
-        dotnet pack -c Release
+      run: dotnet pack -c Release
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v1
       with:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
+    - name: Upload Linux intermediate artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: Linux-Intermediates
+        path: src/ElectionGuard/obj/Release
   windows_build:
     name: 'Windows Build'
     env:
@@ -51,14 +54,17 @@ jobs:
       if:
       run: dotnet test -c Release
     - name: Package
-      run: |
-        commit="${{ github.sha }}"
-        dotnet pack -c Release
+      run: dotnet pack -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
       with:
         name: Windows-Release
         path: src/ElectionGuard/bin/Release
+    - name: Upload Windows intermediate artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: Windows-Intermediates
+        path: src/ElectionGuard/obj/Release
   macos_build:
     name: 'MacOS Build'
     env:
@@ -82,11 +88,14 @@ jobs:
       if: false # Disabled
       run: dotnet test -c Release
     - name: Package
-      run: |
-        commit="${{ github.sha }}"
-        dotnet pack -c Release
+      run: dotnet pack -c Release
     - name: Upload MacOS artifacts
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
+    - name: Upload MacOS intermediate artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: MacOS-Intermediates
+        path: src/ElectionGuard/obj/Release
