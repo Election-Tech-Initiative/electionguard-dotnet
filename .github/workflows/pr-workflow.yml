@@ -23,6 +23,11 @@ jobs:
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: Linux-Release
+        path: src/ElectionGuard/bin/Release
   windows_build:
     name: 'Windows Build'
     env:
@@ -39,6 +44,11 @@ jobs:
     - name: Test
       if:
       run: dotnet test -c Release
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: Windows-Release
+        path: src/ElectionGuard/bin/Release
   macos_build:
     name: 'MacOS Build'
     env:
@@ -61,3 +71,8 @@ jobs:
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
+    - name: Upload MacOS artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: MacOS-Release
+        path: src/ElectionGuard/bin/Release
