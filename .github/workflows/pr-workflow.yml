@@ -20,10 +20,10 @@ jobs:
       run: dotnet --info
     - name: DotNet Nuget Version
       run: dotnet nuget --version
-    - name: DotNet Nuget Locals Ingo
+    - name: DotNet Nuget Locals Info
       run: dotnet nuget locals all --list
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build -c Release -v diag > build.log
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -39,6 +39,11 @@ jobs:
       with:
         name: Linux-Intermediates
         path: src/ElectionGuard/obj/Release
+    - name: Upload Linux build log
+      uses: actions/upload-artifact@v1
+      with:
+        name: Linux-build.log
+        path: build.log
   windows_build:
     name: 'Windows Build'
     env:
@@ -54,10 +59,10 @@ jobs:
       run: dotnet --info
     - name: DotNet Nuget Version
       run: dotnet nuget --version
-    - name: DotNet Nuget Locals Ingo
+    - name: DotNet Nuget Locals Info
       run: dotnet nuget locals all --list
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build -c Release -v diag > build.log
     - name: Test
       if:
       run: dotnet test -c Release
@@ -73,6 +78,11 @@ jobs:
       with:
         name: Windows-Intermediates
         path: src/ElectionGuard/obj/Release
+    - name: Upload Windows build log
+      uses: actions/upload-artifact@v1
+      with:
+        name: Windows-build.log
+        path: build.log
   macos_build:
     name: 'MacOS Build'
     env:
@@ -92,10 +102,10 @@ jobs:
       run: dotnet --info
     - name: DotNet Nuget Version
       run: dotnet nuget --version
-    - name: DotNet Nuget Locals Ingo
+    - name: DotNet Nuget Locals Info
       run: dotnet nuget locals all --list
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build -c Release -v diag > build.log
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -111,3 +121,8 @@ jobs:
       with:
         name: MacOS-Intermediates
         path: src/ElectionGuard/obj/Release
+    - name: Upload MacOS build log
+      uses: actions/upload-artifact@v1
+      with:
+        name: MacOS-build.log
+        path: build.log
