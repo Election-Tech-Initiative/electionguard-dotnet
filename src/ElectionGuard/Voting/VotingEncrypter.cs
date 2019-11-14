@@ -1,6 +1,6 @@
 ﻿using System;
 using ElectionGuard.SDK.Cryptography;
-using ElectionGuard.SDK.KeyCeremony;
+using ElectionGuard.SDK.Serialization;
 using ElectionGuard.SDK.Utility;
 using ElectionGuard.SDK.Voting.Encrypter;
 
@@ -11,27 +11,34 @@ namespace ElectionGuard.SDK.Voting
         private UIntPtr _encrypter;
         private UniqueIdentifier _uniqueIdentifier;
 
-        public VotingEncrypter(JointPublicKeyResponse jointKeyResponse, uint numberOfSelections, byte[] byteHash)
+        public VotingEncrypter(string jointKey, int numberOfSelections, string baseHashCode)
         {
-            var jointKey = EncrypterApi.NewJointPublicKey(jointKeyResponse);
-            Initialize(jointKey, numberOfSelections, byteHash);
-            EncrypterApi.FreeJointPublicKey(jointKey);
+            var byteHash = Convert.FromBase64String(baseHashCode);
+            var jointPublicKey = EncrypterApi.NewJointPublicKey(jointKey);
+            Initialize(jointPublicKey, numberOfSelections, byteHash);
+            EncrypterApi.FreeJointPublicKey(jointPublicKey);
         }
 
-        public VotingEncrypter(JointPublicKey jointKey, uint numberOfSelections, byte[] byteHash)
+        public VotingEncrypter(JointPublicKeyResponse jointKeyResponse, int numberOfSelections, byte[] byteHash)
         {
-           Initialize(jointKey, numberOfSelections, byteHash);
+            var jointPublicKey = EncrypterApi.NewJointPublicKey(jointKeyResponse);
+            Initialize(jointPublicKey, numberOfSelections, byteHash);
+            EncrypterApi.FreeJointPublicKey(jointPublicKey);
         }
 
-        private void Initialize(JointPublicKey jointKey, uint numberOfSelections, byte[] byteHash)
+        public VotingEncrypter(JointPublicKey jointPublicKey, int numberOfSelections, byte[] byteHash)
+        {
+           Initialize(jointPublicKey, numberOfSelections, byteHash);
+        }
+
+        private void Initialize(JointPublicKey jointPublicKey, int numberOfSelections, byte[] byteHash)
         {
             if (byteHash.Length > CryptographySettings.HashDigestSizeBytes)
             {
                 throw new ArgumentOutOfRangeException(nameof(byteHash));
             }
-
             _uniqueIdentifier = EncrypterApi.NewUniqueIdentifier();
-            var response = EncrypterApi.NewEncrypter(_uniqueIdentifier, jointKey, numberOfSelections, byteHash);
+            var response = EncrypterApi.NewEncrypter(_uniqueIdentifier, jointPublicKey, Convert.ToUInt32(numberOfSelections), byteHash);
 
             if (response.Status == EncrypterStatus.Success)
             {

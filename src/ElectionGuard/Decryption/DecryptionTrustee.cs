@@ -12,7 +12,16 @@ namespace ElectionGuard.SDK.Decryption
     {
         private UIntPtr _trustee;
 
-        public DecryptionTrustee(uint numberOfTrustees, uint threshold, uint numberOfSelections,
+        public DecryptionTrustee(int numberOfTrustees, int threshold, int numberOfSelections,
+            string trusteeKey, string baseHash)
+        {
+            var byteHash = Convert.FromBase64String(baseHash);
+            var trusteeState = TrusteeApi.NewTrusteeState(trusteeKey);
+            Initialize(numberOfTrustees, threshold, numberOfSelections, trusteeState, byteHash);
+            TrusteeApi.FreeTrusteeState(trusteeState);
+        }
+
+        public DecryptionTrustee(int numberOfTrustees, int threshold, int numberOfSelections,
             TrusteeStateExport trusteeStateExport, byte[] baseHash)
         {
             var trusteeState = TrusteeApi.NewTrusteeState(trusteeStateExport);
@@ -20,15 +29,19 @@ namespace ElectionGuard.SDK.Decryption
             TrusteeApi.FreeTrusteeState(trusteeState);
         }
 
-
-        public DecryptionTrustee(uint numberOfTrustees, uint threshold, uint numberOfSelections, TrusteeState trusteeState, byte[] baseHash)
+        public DecryptionTrustee(int numberOfTrustees, int threshold, int numberOfSelections, TrusteeState trusteeState, byte[] baseHash)
         {
             Initialize(numberOfTrustees, threshold, numberOfSelections, trusteeState, baseHash);
         }
 
-        private void Initialize(uint numberOfTrustees, uint threshold, uint numberOfSelections, TrusteeState trusteeState, byte[] baseHash)
+        private void Initialize(int numberOfTrustees, int threshold, int numberOfSelections, TrusteeState trusteeState, byte[] baseHash)
         {
-            var response = TrusteeApi.NewTrustee(numberOfTrustees, threshold, numberOfSelections, trusteeState, baseHash);
+            var response = TrusteeApi.NewTrustee(
+                Convert.ToUInt32(numberOfTrustees), 
+                Convert.ToUInt32(threshold), 
+                Convert.ToUInt32(numberOfSelections), 
+                trusteeState, 
+                baseHash);
             if (response.Status == TrusteeStatus.Success)
             {
                 _trustee = response.Trustee;

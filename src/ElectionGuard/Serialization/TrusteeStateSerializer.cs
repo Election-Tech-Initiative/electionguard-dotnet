@@ -9,10 +9,7 @@ namespace ElectionGuard.SDK.Serialization
     {
         public static byte[] Serialize(TrusteeStateExport response)
         {
-            var raw = response.Raw.Split('-');
-            var array = new byte[raw.Length];
-            for (var i = 0; i < raw.Length; i++) array[i] = Convert.ToByte(raw[i], 16);
-            return array;
+            return ByteSerializer.SerializeFromBase64(response.Base64);
         }
 
         public static TrusteeStateExport Deserialize(byte[] raw, int numberOfTrustees)

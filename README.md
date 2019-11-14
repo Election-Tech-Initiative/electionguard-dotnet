@@ -1,7 +1,7 @@
 
 # 🗳️ ElectionGuard SDK C#
 
-![build](https://github.com/microsoft/ElectionGuard-SDK-CSharp/workflows/Build/badge.svg)
+![build](https://github.com/microsoft/ElectionGuard-SDK-CSharp/workflows/Package/badge.svg)
 [![nuget](https://img.shields.io/nuget/dt/ElectionGuard-SDK-CSharp)]()
 [![license](https://img.shields.io/github/license/microsoft/ElectionGuard-SDK-CSharp)](.License)
 
