@@ -25,13 +25,25 @@ namespace ElectionGuard.SDK.Decryption.Trustee
         [DllImport("electionguard", EntryPoint = "Decryption_Trustee_compute_fragments")]
         internal static extern ComputeFragmentsReturn ComputeFragments(UIntPtr trustee, DecryptionFragmentsRequest fragmentsRequest);
 
+        internal static TrusteeState NewTrusteeState(string trusteeKey)
+        {
+            var trusteeState = Convert.FromBase64String(trusteeKey);
+            return NewTrusteeState(trusteeState);
+        }
+
         internal static TrusteeState NewTrusteeState(TrusteeStateExport trusteeStateExport)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(trusteeStateExport.Length);
-            Marshal.Copy(TrusteeStateSerializer.Serialize(trusteeStateExport), 0, unmanagedPointer, trusteeStateExport.Length);
+            var trusteeState = TrusteeStateSerializer.Serialize(trusteeStateExport);
+            return NewTrusteeState(trusteeState);
+        }
+
+        internal static TrusteeState NewTrusteeState(byte[] trusteeState)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(trusteeState.Length);
+            Marshal.Copy(trusteeState, 0, unmanagedPointer, trusteeState.Length);
             return new TrusteeState()
             {
-                Length = trusteeStateExport.Length,
+                Length = trusteeState.Length,
                 Bytes = unmanagedPointer,
             };
         }

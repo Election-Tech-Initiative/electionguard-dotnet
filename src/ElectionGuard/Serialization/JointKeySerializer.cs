@@ -9,7 +9,7 @@ namespace ElectionGuard.SDK.Serialization
     {
         public static byte[] Serialize(JointPublicKeyResponse response)
         {
-            return ByteSerializer.SerializeFromRaw(response.Raw);
+            return ByteSerializer.SerializeFromBase64(response.Base64);
         }
 
         public static JointPublicKeyResponse Deserialize(byte[] raw)

@@ -34,13 +34,25 @@ namespace ElectionGuard.SDK.Voting.Encrypter
             Marshal.FreeHGlobal(uniqueIdentifier);
         }
 
+        internal static JointPublicKey NewJointPublicKey(string jointPublicKey)
+        {
+            var jointKey = Convert.FromBase64String(jointPublicKey);
+            return NewJointPublicKey(jointKey);
+        }
+
         internal static JointPublicKey NewJointPublicKey(JointPublicKeyResponse jointPublicKeyResponse)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(jointPublicKeyResponse.Length);
-            Marshal.Copy(JointKeySerializer.Serialize(jointPublicKeyResponse), 0, unmanagedPointer, jointPublicKeyResponse.Length);
+            var jointKey = JointKeySerializer.Serialize(jointPublicKeyResponse);
+            return NewJointPublicKey(jointKey);
+        }
+
+        internal static JointPublicKey NewJointPublicKey(byte[] jointPublicKey)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(jointPublicKey.Length);
+            Marshal.Copy(jointPublicKey, 0, unmanagedPointer, jointPublicKey.Length);
             return new JointPublicKey()
             {
-                Length = jointPublicKeyResponse.Length,
+                Length = jointPublicKey.Length,
                 Bytes = unmanagedPointer,
             };
         }
