@@ -3,15 +3,9 @@
 $repo = "microsoft/ElectionGuard-SDK-C-Implementation"
 $file = "electionguard.zip"
 
-$releases = "https://api.github.com/repos/$repo/releases"
-
 Write-Host Determining latest release
-# NOTE: $GITHUB_TOKEN environment variable is used on build machines because of Github's rate limit.
-#   It is not necessary on local machines, because the request will go through as unauthenticated if
-#   token is not provided. Github allows 60 unauthenticated per hour per originating IP address.
-#   https://developer.github.com/v3/#rate-limiting
-$headers = @{ Authorization = "token $env:GITHUB_TOKEN" }
-$tag = (Invoke-WebRequest -Uri $releases -Headers $headers | ConvertFrom-Json)[0].tag_name
+$tag = git ls-remote --tags --sort="v:refname" git://github.com/$repo.git | tail -n1 | sed 's/.*\///; s/\^{}//'
+Write-Host "Latest release tag found: $tag"
 
 $download = "https://github.com/$repo/releases/download/$tag/$file"
 $name = $file.Split(".")[0]

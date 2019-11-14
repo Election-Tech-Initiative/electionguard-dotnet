@@ -3,18 +3,8 @@
 REPO="microsoft/ElectionGuard-SDK-C-Implementation"
 FILE="electionguard.zip"
 
-RELEASES="https://api.github.com/repos/$REPO/releases"
-
 echo "Determining latest release"
-# NOTE: $GITHUB_TOKEN environment variable is used on build machines because of Github's rate limit.
-#   It is not necessary on local machines, because the request will go through as unauthenticated if
-#   token is not provided. Github allows 60 unauthenticated per hour per originating IP address.
-#   https://developer.github.com/v3/#rate-limiting
-RELEASES_REQUEST="curl -i --silent --url ""$RELEASES"" --header 'Authorization: token $GITHUB_TOKEN'"
-# Uncomment lines below if we need to debug the response
-RELEASES_RESPONSE=$($RELEASES_REQUEST)
-echo "Latest release response JSON: $RELEASES_RESPONSE"
-TAG=$($RELEASES_REQUEST | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+TAG=$(git ls-remote --tags --sort="v:refname" git://github.com/$REPO.git | tail -n1 | sed 's/.*\///; s/\^{}//')
 echo "Latest release tag found: $TAG"
 
 DOWNLOAD="https://github.com/$REPO/releases/download/$TAG/$FILE"
