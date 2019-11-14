@@ -6,9 +6,10 @@ FILE="electionguard.zip"
 RELEASES="https://api.github.com/repos/$REPO/releases"
 
 echo "Determining latest release"
-RELEASES_RESPONSE=$(curl --silent "$RELEASES")
+RELEASES_REQUEST="curl --silent --url ""$RELEASES"" --header 'authorization: Bearer $GITHUB_TOKEN'"
+RELEASES_RESPONSE=$($RELEASES_REQUEST)
 echo "Latest release response JSON: $RELEASES_RESPONSE"
-TAG=$(curl --silent "$RELEASES" | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+TAG=$($RELEASES_REQUEST | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 echo "Latest release tag found: $TAG"
 
 DOWNLOAD="https://github.com/$REPO/releases/download/$TAG/$FILE"

@@ -37,6 +37,8 @@ jobs:
       run: dotnet test -c Release
   macos_build:
     name: 'MacOS Build'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: 'macOS-latest'
     steps:
     - uses: actions/checkout@master
