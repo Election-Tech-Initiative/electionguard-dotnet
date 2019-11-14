@@ -17,18 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ElectionGuard\ElectionGuard.SDK.csproj" />
   </ItemGroup>
-	<Target Name="Windows_Debug" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
-		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;" />
-	</Target>
-	<Target Name="Windows_Release" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
-		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\download-latest.ps1\&quot;; }&quot;" />
-	</Target>
-	<Target Name="Unix_Debug" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT' ">
-		<Exec Command="$(ProjectDir)..\..\scripts\migrate-local.sh" />
-	</Target>
-	<Target Name="Unix_Release" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT' ">
-		<Exec Command="$(ProjectDir)..\..\scripts\download-latest.sh" />
-	</Target>
 	<Target Name="Copy" AfterTargets="AfterBuild">
 		<ItemGroup>
 			<ElectionGuard Include="..\..\libs\electionguard\*" />
