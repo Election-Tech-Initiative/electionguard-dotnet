@@ -20,9 +20,10 @@
 	<Target Name="Copy" AfterTargets="AfterBuild">
 		<ItemGroup>
 			<ElectionGuard Include="..\..\libs\electionguard\*" />
-			<ElectionGuardOSX Include="..\..\libs\electionguard\*.dylib" />
+      <!-- TODO: Figure out how OSX can find and use the native library during tests -->
+			<!-- <ElectionGuardOSX Include="..\..\libs\electionguard\*.dylib" /> -->
 		</ItemGroup>
 		<Copy SourceFiles="@(ElectionGuard)" DestinationFolder="$(OutDir)" />
-		<Copy SourceFiles="@(ElectionGuardOSX)" DestinationFolder="$(OutDir)runtimes\osx\native" />
+		<!-- <Copy SourceFiles="@(ElectionGuardOSX)" DestinationFolder="$(OutDir)runtimes\osx\native" /> -->
 	</Target>
 </Project>

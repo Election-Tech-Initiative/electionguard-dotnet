@@ -6,6 +6,10 @@ FILE="electionguard.zip"
 RELEASES="https://api.github.com/repos/$REPO/releases"
 
 echo "Determining latest release"
+# NOTE: $GITHUB_TOKEN environment variable is used on build machines because of Github's rate limit.
+#   It is not necessary on local machines, because the request will go through as unauthenticated if
+#   token is not provided. Github allows 60 unauthenticated per hour per originating IP address.
+#   https://developer.github.com/v3/#rate-limiting
 RELEASES_REQUEST="curl --silent --url ""$RELEASES"" --header 'Authorization: token $GITHUB_TOKEN'"
 # Uncomment lines below if we need to debug the response
 # RELEASES_RESPONSE=$($RELEASES_REQUEST)
