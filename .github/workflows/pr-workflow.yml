@@ -42,7 +42,7 @@ jobs:
     - name: Build and Package
       run: dotnet build -c Release
     - name: Test
-      if:
+      if: false
       run: dotnet test -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
