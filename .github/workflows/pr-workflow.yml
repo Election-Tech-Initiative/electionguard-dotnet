@@ -22,7 +22,7 @@ jobs:
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.LINUX_VERBOSE_LOGGING == 1
+      if: env.LINUX_VERBOSE_LOGGING == 'true'
       run: |
         dotnet --info
         dotnet nuget locals all --list
@@ -41,13 +41,13 @@ jobs:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload Linux intermediate artifacts
-      if: env.LINUX_VERBOSE_LOGGING == 1
+      if: env.LINUX_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: Linux-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload Linux build log
-      if: env.LINUX_VERBOSE_LOGGING == 1
+      if: env.LINUX_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: Linux-build.log
@@ -79,13 +79,13 @@ jobs:
         name: Windows-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload Windows intermediate artifacts
-      if: env.WINDOWS_VERBOSE_LOGGING == 1
+      if: env.WINDOWS_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: Windows-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload Windows build log
-      if: env.WINDOWS_VERBOSE_LOGGING == 1
+      if: env.WINDOWS_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: Windows-build.log
@@ -106,7 +106,7 @@ jobs:
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.MACOS_VERBOSE_LOGGING == 1
+      if: env.MACOS_VERBOSE_LOGGING == 'true'
       run: |
         dotnet --info
         dotnet nuget locals all --list
@@ -125,13 +125,13 @@ jobs:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload MacOS intermediate artifacts
-      if: env.MACOS_VERBOSE_LOGGING == 1
+      if: env.MACOS_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload MacOS build log
-      if: env.MACOS_VERBOSE_LOGGING == 1
+      if: env.MACOS_VERBOSE_LOGGING == 'true'
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-build.log
