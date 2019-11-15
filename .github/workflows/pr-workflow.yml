@@ -54,9 +54,7 @@ jobs:
     # - name: DotNet Nuget Locals Info
     #   run: dotnet nuget locals all --list
     - name: Build and Package
-      run: |
-        commit="${{ github.sha }}"
-        dotnet build -c Release --version-suffix "${commit:0:7}" # -v diag > build.log
+      run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7)) # -v diag > build.log
     - name: Test
       if:
       run: dotnet test -c Release
