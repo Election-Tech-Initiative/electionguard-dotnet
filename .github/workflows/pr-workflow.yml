@@ -6,22 +6,29 @@ jobs:
   linux_build:
     name: 'Linux Build'
     runs-on: 'ubuntu-latest'
+    env:
+      VERBOSE_LOGGING: true # set to true to enable verbose log output
     steps:
     - uses: actions/checkout@master
       with:
         submodules: true
+    - name: Output Verbose Logging
+      run: echo $VERBOSE_LOGGING
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
-    # - name: DotNet Info
-    #   run: dotnet --info
-    # - name: DotNet Nuget Locals Info
-    #   run: dotnet nuget locals all --list
+    - name: DotNet Info
+      if: env.VERBOSE_LOGGING
+      run: dotnet --info
+    - name: DotNet Nuget Locals Info
+      if: env.VERBOSE_LOGGING
+      run: dotnet nuget locals all --list
     - name: Build and Package
       run: |
         commit="${{ github.sha }}"
-        dotnet build -c Release --version-suffix "${commit:0:7}" # -v diag > build.log
+        [[ $VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
+        dotnet build -c Release --version-suffix "${commit:0:7}" $addl_params
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -30,16 +37,18 @@ jobs:
       with:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
-    # - name: Upload Linux intermediate artifacts
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: Linux-Intermediates
-    #     path: src/ElectionGuard/obj/Release
-    # - name: Upload Linux build log
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: Linux-build.log
-    #     path: build.log
+    - name: Upload Linux intermediate artifacts
+      if: env.VERBOSE_LOGGING
+      uses: actions/upload-artifact@v1
+      with:
+        name: Linux-Intermediates
+        path: src/ElectionGuard/obj/Release
+    - name: Upload Linux build log
+      if: env.VERBOSE_LOGGING
+      uses: actions/upload-artifact@v1
+      with:
+        name: Linux-build.log
+        path: build.log
   windows_build:
     name: 'Windows Build'
     runs-on: 'windows-latest'
