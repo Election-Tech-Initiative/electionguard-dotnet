@@ -19,30 +19,34 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
-		<None Include="..\..\libs\electionguard\*.dll">
-			<Pack>True</Pack>
-			<PackagePath>runtimes\win\native</PackagePath>
-		</None>
-		<None Include="..\..\libs\electionguard\*.so">
-			<Pack>True</Pack>
-			<PackagePath>runtimes\linux\native</PackagePath>
-		</None>
-		<None Include="..\..\libs\electionguard\*.dylib">
-			<Pack>True</Pack>
-			<PackagePath>runtimes\osx\native</PackagePath>
-		</None>
 	</ItemGroup>
-	<Target Name="Windows_Debug" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
+	<Target Name="Windows_Debug" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' == 'Windows_NT' ">
 		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\migrate-local.ps1\&quot;; }&quot;" />
 	</Target>
-	<Target Name="Windows_Release" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+	<Target Name="Windows_Release" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
 		<Exec Command="powershell -Command &quot;&amp; { . \&quot;$(ProjectDir)..\..\scripts\download-latest.ps1\&quot;; }&quot;" />
 	</Target>
-	<Target Name="Unix_Debug" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT' ">
+	<Target Name="Unix_Debug" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)'=='Debug' And '$(OS)' != 'Windows_NT' ">
 		<Exec Command="$(ProjectDir)..\..\scripts\migrate-local.sh" />
 	</Target>
-	<Target Name="Unix_Release" AfterTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT' ">
+	<Target Name="Unix_Release" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)'=='Release' And '$(OS)' != 'Windows_NT' ">
 		<Exec Command="$(ProjectDir)..\..\scripts\download-latest.sh" />
+	</Target>
+	<Target Name="IncludeNativeRuntimes" AfterTargets="BeforeBuild">
+		<ItemGroup>
+			<None Include="..\..\libs\electionguard\*.dll">
+				<Pack>True</Pack>
+				<PackagePath>runtimes\win\native</PackagePath>
+			</None>
+			<None Include="..\..\libs\electionguard\*.so">
+				<Pack>True</Pack>
+				<PackagePath>runtimes\linux\native</PackagePath>
+			</None>
+			<None Include="..\..\libs\electionguard\*.dylib">
+				<Pack>True</Pack>
+				<PackagePath>runtimes\osx\native</PackagePath>
+			</None>
+		</ItemGroup>
 	</Target>
 	<Target Name="Copy" AfterTargets="AfterBuild">
 		<ItemGroup>

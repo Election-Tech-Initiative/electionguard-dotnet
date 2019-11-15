@@ -5,8 +5,6 @@ on: [pull_request]
 jobs:
   linux_build:
     name: 'Linux Build'
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: 'ubuntu-latest'
     steps:
     - uses: actions/checkout@master
@@ -16,38 +14,32 @@ jobs:
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
-    - name: DotNet Info
-      run: dotnet --info
-    - name: DotNet Nuget Version
-      run: dotnet nuget --version
-    - name: DotNet Nuget Locals Info
-      run: dotnet nuget locals all --list
-    - name: Build
-      run: dotnet build -c Release -v diag > build.log
+    # - name: DotNet Info
+    #   run: dotnet --info
+    # - name: DotNet Nuget Locals Info
+    #   run: dotnet nuget locals all --list
+    - name: Build and Package
+      run: dotnet build -c Release # -v diag > build.log
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
-    - name: Package
-      run: dotnet pack -c Release
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v1
       with:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
-    - name: Upload Linux intermediate artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: Linux-Intermediates
-        path: src/ElectionGuard/obj/Release
-    - name: Upload Linux build log
-      uses: actions/upload-artifact@v1
-      with:
-        name: Linux-build.log
-        path: build.log
+    # - name: Upload Linux intermediate artifacts
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: Linux-Intermediates
+    #     path: src/ElectionGuard/obj/Release
+    # - name: Upload Linux build log
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: Linux-build.log
+    #     path: build.log
   windows_build:
     name: 'Windows Build'
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: 'windows-latest'
     steps:
     - uses: actions/checkout@master
@@ -55,38 +47,32 @@ jobs:
         submodules: true
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
-    - name: DotNet Info
-      run: dotnet --info
-    - name: DotNet Nuget Version
-      run: dotnet nuget --version
-    - name: DotNet Nuget Locals Info
-      run: dotnet nuget locals all --list
-    - name: Build
-      run: dotnet build -c Release -v diag > build.log
+    # - name: DotNet Info
+    #   run: dotnet --info
+    # - name: DotNet Nuget Locals Info
+    #   run: dotnet nuget locals all --list
+    - name: Build and Package
+      run: dotnet build -c Release # -v diag > build.log
     - name: Test
       if:
       run: dotnet test -c Release
-    - name: Package
-      run: dotnet pack -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
       with:
         name: Windows-Release
         path: src/ElectionGuard/bin/Release
-    - name: Upload Windows intermediate artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: Windows-Intermediates
-        path: src/ElectionGuard/obj/Release
-    - name: Upload Windows build log
-      uses: actions/upload-artifact@v1
-      with:
-        name: Windows-build.log
-        path: build.log
+    # - name: Upload Windows intermediate artifacts
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: Windows-Intermediates
+    #     path: src/ElectionGuard/obj/Release
+    # - name: Upload Windows build log
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: Windows-build.log
+    #     path: build.log
   macos_build:
     name: 'MacOS Build'
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: 'macOS-latest'
     steps:
     - uses: actions/checkout@master
@@ -98,31 +84,27 @@ jobs:
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
-    - name: DotNet Info
-      run: dotnet --info
-    - name: DotNet Nuget Version
-      run: dotnet nuget --version
-    - name: DotNet Nuget Locals Info
-      run: dotnet nuget locals all --list
-    - name: Build
-      run: dotnet build -c Release -v diag > build.log
+    # - name: DotNet Info
+    #   run: dotnet --info
+    # - name: DotNet Nuget Locals Info
+    #   run: dotnet nuget locals all --list
+    - name: Build and Package
+      run: dotnet build -c Release # -v diag > build.log
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
-    - name: Package
-      run: dotnet pack -c Release
     - name: Upload MacOS artifacts
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
-    - name: Upload MacOS intermediate artifacts
-      uses: actions/upload-artifact@v1
-      with:
-        name: MacOS-Intermediates
-        path: src/ElectionGuard/obj/Release
-    - name: Upload MacOS build log
-      uses: actions/upload-artifact@v1
-      with:
-        name: MacOS-build.log
-        path: build.log
+    # - name: Upload MacOS intermediate artifacts
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: MacOS-Intermediates
+    #     path: src/ElectionGuard/obj/Release
+    # - name: Upload MacOS build log
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: MacOS-build.log
+    #     path: build.log
