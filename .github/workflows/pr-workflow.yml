@@ -2,31 +2,34 @@ name: Pull Request
 
 on: [pull_request]
 
+env:
+  LINUX_VERBOSE_LOGGING: false # set to true to enable verbose log output
+  WINDOWS_VERBOSE_LOGGING: false # set to true to enable verbose log output
+  MACOS_VERBOSE_LOGGING: false # set to true to enable verbose log output
+
 jobs:
   linux_build:
     name: 'Linux Build'
     runs-on: 'ubuntu-latest'
     steps:
-      env:
-        VERBOSE_LOGGING: false # set to true to enable verbose log output
     - uses: actions/checkout@master
       with:
         submodules: true
     - name: Output Verbose Logging for Linux
-      run: echo $VERBOSE_LOGGING
+      run: echo $LINUX_VERBOSE_LOGGING
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.VERBOSE_LOGGING == true
+      if: env.LINUX_VERBOSE_LOGGING == true
       run: |
         dotnet --info
         dotnet nuget locals all --list
     - name: Build and Package
       run: |
         commit="${{ github.sha }}"
-        [[ $VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
+        [[ $LINUX_VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
         command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
         eval $command
     - name: Test
@@ -38,13 +41,13 @@ jobs:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload Linux intermediate artifacts
-      if: env.VERBOSE_LOGGING == true
+      if: env.LINUX_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: Linux-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload Linux build log
-      if: env.VERBOSE_LOGGING == true
+      if: env.LINUX_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: Linux-build.log
@@ -86,13 +89,11 @@ jobs:
     name: 'MacOS Build'
     runs-on: 'macOS-latest'
     steps:
-      env:
-        VERBOSE_LOGGING: true # set to true to enable verbose log output
     - uses: actions/checkout@master
       with:
         submodules: true
     - name: Output Verbose Logging for MacOS
-      run: echo $VERBOSE_LOGGING
+      run: echo $MACOS_VERBOSE_LOGGING
     - name: Upgrade dotnet core sdk
       run: brew cask install dotnet-sdk
     - name: Setup Commands
@@ -100,14 +101,14 @@ jobs:
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.VERBOSE_LOGGING == true
+      if: env.MACOS_VERBOSE_LOGGING == true
       run: |
         dotnet --info
         dotnet nuget locals all --list
     - name: Build and Package
       run: |
         commit="${{ github.sha }}"
-        [[ $VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
+        [[ $MACOS_VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
         command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
         eval $command
     - name: Test
@@ -119,13 +120,13 @@ jobs:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload MacOS intermediate artifacts
-      if: env.VERBOSE_LOGGING == true
+      if: env.MACOS_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload MacOS build log
-      if: env.VERBOSE_LOGGING == true
+      if: env.MACOS_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-build.log
