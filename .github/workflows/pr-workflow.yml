@@ -15,14 +15,12 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Output Verbose Logging for Linux
-      run: echo $LINUX_VERBOSE_LOGGING
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/g' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.LINUX_VERBOSE_LOGGING == true
+      if: $LINUX_VERBOSE_LOGGING == true
       run: |
         dotnet --info
         dotnet nuget locals all --list
@@ -41,13 +39,13 @@ jobs:
         name: Linux-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload Linux intermediate artifacts
-      if: env.LINUX_VERBOSE_LOGGING == true
+      if: $LINUX_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: Linux-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload Linux build log
-      if: env.LINUX_VERBOSE_LOGGING == true
+      if: $LINUX_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: Linux-build.log
@@ -61,10 +59,11 @@ jobs:
         submodules: true
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
-    # - name: DotNet and Nuget Locals Info
-    #   run: |
-    #     dotnet --info
-    #     dotnet nuget locals all --list
+    - name: DotNet and Nuget Locals Info
+      if: $WINDOWS_VERBOSE_LOGGING == true
+      run: |
+        dotnet --info
+        dotnet nuget locals all --list
     - name: Build and Package
       run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7)) # -v diag > build.log
     - name: Test
@@ -75,16 +74,18 @@ jobs:
       with:
         name: Windows-Release
         path: src/ElectionGuard/bin/Release
-    # - name: Upload Windows intermediate artifacts
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: Windows-Intermediates
-    #     path: src/ElectionGuard/obj/Release
-    # - name: Upload Windows build log
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: Windows-build.log
-    #     path: build.log
+    - name: Upload Windows intermediate artifacts
+      if: $WINDOWS_VERBOSE_LOGGING == true
+      uses: actions/upload-artifact@v1
+      with:
+        name: Windows-Intermediates
+        path: src/ElectionGuard/obj/Release
+    - name: Upload Windows build log
+      if: $WINDOWS_VERBOSE_LOGGING == true
+      uses: actions/upload-artifact@v1
+      with:
+        name: Windows-build.log
+        path: build.log
   macos_build:
     name: 'MacOS Build'
     runs-on: 'macOS-latest'
@@ -92,8 +93,6 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Output Verbose Logging for MacOS
-      run: echo $MACOS_VERBOSE_LOGGING
     - name: Upgrade dotnet core sdk
       run: brew cask install dotnet-sdk
     - name: Setup Commands
@@ -101,7 +100,7 @@ jobs:
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.MACOS_VERBOSE_LOGGING == true
+      if: $MACOS_VERBOSE_LOGGING == true
       run: |
         dotnet --info
         dotnet nuget locals all --list
@@ -120,13 +119,13 @@ jobs:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
     - name: Upload MacOS intermediate artifacts
-      if: env.MACOS_VERBOSE_LOGGING == true
+      if: $MACOS_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-Intermediates
         path: src/ElectionGuard/obj/Release
     - name: Upload MacOS build log
-      if: env.MACOS_VERBOSE_LOGGING == true
+      if: $MACOS_VERBOSE_LOGGING == true
       uses: actions/upload-artifact@v1
       with:
         name: MacOS-build.log
