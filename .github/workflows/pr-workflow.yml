@@ -4,8 +4,8 @@ on: [pull_request]
 
 env:
   LINUX_VERBOSE_LOGGING: false # set to true to enable verbose log output
-  WINDOWS_VERBOSE_LOGGING: false # set to true to enable verbose log output
-  MACOS_VERBOSE_LOGGING: true # set to true to enable verbose log output
+  WINDOWS_VERBOSE_LOGGING: true # set to true to enable verbose log output
+  MACOS_VERBOSE_LOGGING: false # set to true to enable verbose log output
 
 jobs:
   linux_build:
@@ -60,7 +60,7 @@ jobs:
       with:
         submodules: true
     - name: Output Verbose Logging for Windows
-      run: echo $WINDOWS_VERBOSE_LOGGING
+      run: Write-Host $Env:WINDOWS_VERBOSE_LOGGING
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: DotNet and Nuget Locals Info
@@ -69,7 +69,10 @@ jobs:
         dotnet --info
         dotnet nuget locals all --list
     - name: Build and Package
-      run: dotnet build -c Release --version-suffix ("${{ github.sha }}".Substring(0,7)) # -v diag > build.log
+      run: |
+        $command = "dotnet build -c Release --version-suffix (""${{ github.sha }}"".Substring(0,7))"
+        if ($Env:WINDOWS_VERBOSE_LOGGING) { $command = $command + " -v diag > build.log" }
+        Invoke-Expression $command
     - name: Test
       if:
       run: dotnet test -c Release
