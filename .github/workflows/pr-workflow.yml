@@ -64,7 +64,7 @@ jobs:
     - name: Configure Nuget
       run: ((Get-Content -path nuget.config -Raw) -replace 'GITHUB_TOKEN','${{ secrets.GITHUB_TOKEN }}') | Set-Content -Path nuget.config
     - name: DotNet and Nuget Locals Info
-      if: env.WINDOWS_VERBOSE_LOGGING
+      if: env.WINDOWS_VERBOSE_LOGGING == 'true'
       run: |
         dotnet --info
         dotnet nuget locals all --list
