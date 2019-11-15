@@ -4,7 +4,7 @@ on: [pull_request]
 
 env:
   LINUX_VERBOSE_LOGGING: false # set to true to enable verbose log output
-  WINDOWS_VERBOSE_LOGGING: true # set to true to enable verbose log output
+  WINDOWS_VERBOSE_LOGGING: false # set to true to enable verbose log output
   MACOS_VERBOSE_LOGGING: false # set to true to enable verbose log output
 
 jobs:
