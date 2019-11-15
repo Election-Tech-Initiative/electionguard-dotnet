@@ -3,10 +3,9 @@
 REPO="microsoft/ElectionGuard-SDK-C-Implementation"
 FILE="electionguard.zip"
 
-RELEASES="https://api.github.com/repos/$REPO/releases"
-
 echo "Determining latest release"
-TAG=$(curl --silent "$RELEASES" | grep -Pom1 '"tag_name": "\K.*?(?=")')
+TAG=$(git ls-remote --tags --sort="v:refname" git://github.com/$REPO.git | tail -n1 | sed 's/.*\///; s/\^{}//')
+echo "Latest release tag found: $TAG"
 
 DOWNLOAD="https://github.com/$REPO/releases/download/$TAG/$FILE"
 NAME="electionguard"
@@ -31,9 +30,9 @@ echo "Validating library directory"
 mkdir -p $LIB_PATH
 
 echo "Move release files to library"
-mv -f $DIR/$DLL/$DLL "$LIB_PATH/$DLL"
-mv -f $DIR/$SO/$SO $LIB_PATH/$SO
-mv -f $DIR/$DYLIB/$DYLIB $LIB_PATH/$DYLIB
+mv -f -v $DIR/$DLL/$DLL "$LIB_PATH/$DLL"
+mv -f -v $DIR/$SO/$SO $LIB_PATH/$SO
+mv -f -v $DIR/$DYLIB/$DYLIB $LIB_PATH/$DYLIB
 
 echo "Deleting temp files"
 rm -rf -v $ZIP
