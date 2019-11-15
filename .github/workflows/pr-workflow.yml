@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
-    - name: Output Verbose Logging
+    - name: Output Verbose Logging for Linux
       run: echo $VERBOSE_LOGGING
     - name: Setup Commands
       run: chmod +x ./scripts/download-latest.sh
@@ -92,6 +92,8 @@ jobs:
     - uses: actions/checkout@master
       with:
         submodules: true
+    - name: Output Verbose Logging for MacOS
+      run: echo $VERBOSE_LOGGING
     - name: Upgrade dotnet core sdk
       run: brew cask install dotnet-sdk
     - name: Setup Commands
