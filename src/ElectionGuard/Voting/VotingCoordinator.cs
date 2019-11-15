@@ -10,9 +10,9 @@ namespace ElectionGuard.SDK.Voting
     {
         private readonly UIntPtr _coordinator;
 
-        public VotingCoordinator(uint numberOfSelections)
+        public VotingCoordinator(int numberOfSelections)
         {
-            var response = CoordinatorApi.NewCoordinator(numberOfSelections);
+            var response = CoordinatorApi.NewCoordinator(Convert.ToUInt32(numberOfSelections));
             if (response.Status == CoordinatorStatus.Success)
             {
                 _coordinator = response.Coordinator;
