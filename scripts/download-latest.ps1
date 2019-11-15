@@ -3,10 +3,9 @@
 $repo = "microsoft/ElectionGuard-SDK-C-Implementation"
 $file = "electionguard.zip"
 
-$releases = "https://api.github.com/repos/$repo/releases"
-
 Write-Host Determining latest release
-$tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
+$tag = git ls-remote --tags --sort="v:refname" git://github.com/$repo.git | tail -n1 | sed 's/.*\///; s/\^{}//'
+Write-Host "Latest release tag found: $tag"
 
 $download = "https://github.com/$repo/releases/download/$tag/$file"
 $name = $file.Split(".")[0]
