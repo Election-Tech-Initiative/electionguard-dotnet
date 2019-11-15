@@ -71,7 +71,8 @@ jobs:
     - name: Build and Package
       run: |
         $command = "dotnet build -c Release --version-suffix (""${{ github.sha }}"".Substring(0,7))"
-        if ($Env:WINDOWS_VERBOSE_LOGGING) { $command = $command + " -v diag > build.log" }
+        if ($Env:WINDOWS_VERBOSE_LOGGING -eq 'true') { $command = $command + " -v diag > build.log" }
+        Write-Host $command
         Invoke-Expression $command
     - name: Test
       if:
