@@ -7,7 +7,7 @@ jobs:
     name: 'Linux Build'
     runs-on: 'ubuntu-latest'
     env:
-      VERBOSE_LOGGING: true # set to true to enable verbose log output
+      VERBOSE_LOGGING: false # set to true to enable verbose log output
     steps:
     - uses: actions/checkout@master
       with:
@@ -28,7 +28,8 @@ jobs:
       run: |
         commit="${{ github.sha }}"
         [[ $VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
-        dotnet build -c Release --version-suffix "${commit:0:7}" $addl_params
+        command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
+        eval $command
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -85,6 +86,8 @@ jobs:
   macos_build:
     name: 'MacOS Build'
     runs-on: 'macOS-latest'
+    env:
+      VERBOSE_LOGGING: true # set to true to enable verbose log output
     steps:
     - uses: actions/checkout@master
       with:
@@ -95,14 +98,18 @@ jobs:
       run: chmod +x ./scripts/download-latest.sh
     - name: Configure Nuget
       run: sed -i '' 's/GITHUB_TOKEN/${{ secrets.GITHUB_TOKEN }}/' nuget.config
-    # - name: DotNet Info
-    #   run: dotnet --info
-    # - name: DotNet Nuget Locals Info
-    #   run: dotnet nuget locals all --list
+    - name: DotNet Info
+      if: env.VERBOSE_LOGGING
+      run: dotnet --info
+    - name: DotNet Nuget Locals Info
+      if: env.VERBOSE_LOGGING
+      run: dotnet nuget locals all --list
     - name: Build and Package
       run: |
         commit="${{ github.sha }}"
-        dotnet build -c Release --version-suffix "${commit:0:7}" # -v diag > build.log
+        [[ $VERBOSE_LOGGING = true ]] && addl_params="-v diag > build.log" || addl_params=""
+        command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
+        eval $command
     - name: Test
       if: false # Disabled
       run: dotnet test -c Release
@@ -111,13 +118,15 @@ jobs:
       with:
         name: MacOS-Release
         path: src/ElectionGuard/bin/Release
-    # - name: Upload MacOS intermediate artifacts
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: MacOS-Intermediates
-    #     path: src/ElectionGuard/obj/Release
-    # - name: Upload MacOS build log
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: MacOS-build.log
-    #     path: build.log
+    - name: Upload MacOS intermediate artifacts
+      if: env.VERBOSE_LOGGING
+      uses: actions/upload-artifact@v1
+      with:
+        name: MacOS-Intermediates
+        path: src/ElectionGuard/obj/Release
+    - name: Upload MacOS build log
+      if: env.VERBOSE_LOGGING
+      uses: actions/upload-artifact@v1
+      with:
+        name: MacOS-build.log
+        path: build.log
