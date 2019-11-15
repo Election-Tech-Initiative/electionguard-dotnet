@@ -11,9 +11,9 @@ namespace ElectionGuard.SDK.KeyCeremony
     {
         private readonly UIntPtr _coordinator;
 
-        public KeyCeremonyCoordinator(uint numberOfTrustees, uint threshold)
+        public KeyCeremonyCoordinator(int numberOfTrustees, int threshold)
         {
-            var response = CoordinatorApi.NewCoordinator(numberOfTrustees, threshold);
+            var response = CoordinatorApi.NewCoordinator(Convert.ToUInt32(numberOfTrustees), Convert.ToUInt32(threshold));
             if (response.Status == CoordinatorStatus.Success)
             {
                 _coordinator = response.Coordinator;

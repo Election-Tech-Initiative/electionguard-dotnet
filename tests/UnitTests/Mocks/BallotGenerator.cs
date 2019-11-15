@@ -5,7 +5,7 @@ namespace UnitTests.Mocks
 {
     public static class BallotGenerator
     {
-        public static bool[] FillRandomBallot(uint numberOfSelections)
+        public static bool[] FillRandomBallot(int numberOfSelections)
         {
             if (numberOfSelections > MaxValues.MaxSelections)
             {
