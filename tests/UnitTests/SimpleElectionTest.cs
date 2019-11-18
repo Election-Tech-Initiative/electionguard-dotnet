@@ -7,6 +7,7 @@ using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.Decryption;
 using ElectionGuard.SDK.Decryption.Messages;
 using ElectionGuard.SDK.IO;
+using ElectionGuard.SDK.Models;
 using ElectionGuard.SDK.Voting;
 using ElectionGuard.SDK.Voting.Encrypter;
 using UnitTests.Mocks;
@@ -24,7 +25,7 @@ namespace UnitTests
         private readonly int _threshold;
         private readonly int _numberOfEncrypters;
         private readonly int _numberOfBallotsPerEncrypter;
-        private readonly ContestFormat _contestFormat;
+        private readonly ElectionManifest _electionManifest;
 
         // Key Ceremony
         private const string KeyCeremonyStage = "Key Ceremony";
@@ -55,14 +56,20 @@ namespace UnitTests
             _threshold = threshold;
             _numberOfEncrypters = numberOfEncrypters;
             _numberOfBallotsPerEncrypter = numberOfBallotsPerEncrypter;
-            _contestFormat = new ContestFormat();
+            _electionManifest = new ElectionManifest()
+            {
+                Contests = new Contest[]{ new YesNoContest()
+                {
+                    Type = "YesNo"
+                } },
+            };
         }
 
         [Test, Order(1), NonParallelizable]
         [Category(KeyCeremonyStage)]
         public void Step01_InitializeElection()
         {
-            var election = new Election(_numberOfTrustees, _threshold, _contestFormat);
+            var election = new Election(_numberOfTrustees, _threshold, _electionManifest);
             
             _baseHashCode = election.BaseHashCode;
             Assert.That(string.IsNullOrEmpty(_baseHashCode), Is.False);
@@ -75,6 +82,8 @@ namespace UnitTests
 
             _numberOfSelections = election.NumberOfSelections;
             Assert.Greater(_numberOfSelections, 0);
+            var expectedNumberOfSelections = 3;
+            Assert.AreEqual(expectedNumberOfSelections, _numberOfSelections);
         }
 
         [Test, Order(2), NonParallelizable]
