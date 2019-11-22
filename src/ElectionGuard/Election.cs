@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using ElectionGuard.SDK.KeyCeremony;
-using ElectionGuard.SDK.Config;
+﻿using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Models;
+using ElectionGuard.SDK.Serialization;
+using System;
+using System.Collections.Generic;
 
 namespace ElectionGuard.SDK
 {
     public class Election
     {
-        private byte[] _bashHash;
-        private readonly byte[] _testBaseHash = { 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
         public Election (int numberOfTrustees, int threshold, ElectionManifest electionManifest)
         {
             Profile = electionManifest;
@@ -26,8 +23,7 @@ namespace ElectionGuard.SDK
             TrusteeKeys = new Dictionary<int, string>();
             NumberOfSelections = 0;
 
-            GenerateBaseHash();
-            KeyCeremony();
+            CreateElection(electionManifest);
             CalculateSelections(electionManifest);
         }
 
@@ -45,19 +41,36 @@ namespace ElectionGuard.SDK
 
         public int NumberOfSelections { get; private set; }
 
-        public string BaseHashCode => Convert.ToBase64String(_testBaseHash);
-
-        private void GenerateBaseHash()
+        private void CreateElection(ElectionManifest electionManifest)
         {
-            // TODO Properly Generate Base Hash
-            _bashHash = _testBaseHash;
-        }
+            var config = new APIConfig
+            {
+                NumberOfTrustees = (uint)NumberOfTrustees,
+                Threshold = (uint)Threshold,
+                SubgroupOrder = 0, // TODO: something out of the electionManifest?
+                ElectionMetadata = "placeholder", // TODO: something out of the electionManifest?
+            };
 
-        private void KeyCeremony()
-        {
-            var keyCeremonyProcessor = new KeyCeremonyProcessor(NumberOfTrustees, Threshold, _bashHash);
-            PublicJointKey = keyCeremonyProcessor.GeneratePublicJointKey();
-            TrusteeKeys = keyCeremonyProcessor.GenerateTrusteeKeys();
+            // Set up trustee states array to be marshalled into the api to assign
+            var trusteeStates = new SerializedBytes[MaxValues.MaxTrustees];
+
+            // Call the C library API to create the election and get back the joint public key bytes
+            // The trusteeStates array should be filled out with the appropriate serialized returns as well
+            var jointPublicKey = API.CreateElection(config, trusteeStates);
+
+            // Convert the joint public key to a base64 string that can be stored by a client
+            PublicJointKey = ByteSerializer.ConvertToBase64String(jointPublicKey);
+
+            // Iterate through the trusteeStates returned and convert each to its base64 reprentation
+            for(var i = 0; i < trusteeStates.Length; i++)
+            {
+                var trusteeState = trusteeStates[i];
+                if (trusteeState.Length > 0)
+                {
+                    var trusteeStateKeys = ByteSerializer.ConvertToBase64String(trusteeState);
+                    TrusteeKeys.Add(i, trusteeStateKeys);
+                }
+            }
         }
 
         private void CalculateSelections(ElectionManifest electionManifest)

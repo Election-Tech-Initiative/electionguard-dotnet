@@ -21,7 +21,7 @@ namespace ElectionGuard.SDK.Voting
 
         public VotingEncrypter(JointPublicKeyResponse jointKeyResponse, int numberOfSelections, byte[] byteHash)
         {
-            var jointPublicKey = EncrypterApi.NewJointPublicKey(jointKeyResponse);
+            var jointPublicKey = EncrypterApi.NewJointPublicKey(jointKeyResponse.ToString());
             Initialize(jointPublicKey, numberOfSelections, byteHash);
             EncrypterApi.FreeJointPublicKey(jointPublicKey);
         }

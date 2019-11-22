@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Decryption.Messages;
 using ElectionGuard.SDK.IO;
-using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.Serialization;
 using ElectionGuard.SDK.StateManagement;
 
@@ -31,11 +30,11 @@ namespace ElectionGuard.SDK.Decryption.Trustee
             return NewTrusteeState(trusteeState);
         }
 
-        internal static TrusteeState NewTrusteeState(TrusteeStateExport trusteeStateExport)
-        {
-            var trusteeState = TrusteeStateSerializer.Serialize(trusteeStateExport);
-            return NewTrusteeState(trusteeState);
-        }
+        //internal static TrusteeState NewTrusteeState(TrusteeStateExport trusteeStateExport)
+        //{
+        //    var trusteeState = TrusteeStateSerializer.Serialize(trusteeStateExport);
+        //    return NewTrusteeState(trusteeState);
+        //}
 
         internal static TrusteeState NewTrusteeState(byte[] trusteeState)
         {

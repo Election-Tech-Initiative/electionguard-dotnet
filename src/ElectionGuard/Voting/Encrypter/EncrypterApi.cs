@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using ElectionGuard.SDK.Cryptography;
-using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.Serialization;
 
 namespace ElectionGuard.SDK.Voting.Encrypter
@@ -40,11 +39,11 @@ namespace ElectionGuard.SDK.Voting.Encrypter
             return NewJointPublicKey(jointKey);
         }
 
-        internal static JointPublicKey NewJointPublicKey(JointPublicKeyResponse jointPublicKeyResponse)
-        {
-            var jointKey = JointKeySerializer.Serialize(jointPublicKeyResponse);
-            return NewJointPublicKey(jointKey);
-        }
+        //internal static JointPublicKey NewJointPublicKey(JointPublicKeyResponse jointPublicKeyResponse)
+        //{
+        //    var jointKey = JointKeySerializer.Serialize(jointPublicKeyResponse);
+        //    return NewJointPublicKey(jointKey);
+        //}
 
         internal static JointPublicKey NewJointPublicKey(byte[] jointPublicKey)
         {

@@ -2,7 +2,6 @@
 using ElectionGuard.SDK.Decryption.Messages;
 using ElectionGuard.SDK.Decryption.Trustee;
 using ElectionGuard.SDK.IO;
-using ElectionGuard.SDK.KeyCeremony;
 using ElectionGuard.SDK.StateManagement;
 using ElectionGuard.SDK.Utility;
 
@@ -24,7 +23,7 @@ namespace ElectionGuard.SDK.Decryption
         public DecryptionTrustee(int numberOfTrustees, int threshold, int numberOfSelections,
             TrusteeStateExport trusteeStateExport, byte[] baseHash)
         {
-            var trusteeState = TrusteeApi.NewTrusteeState(trusteeStateExport);
+            var trusteeState = TrusteeApi.NewTrusteeState(trusteeStateExport.ToString());
             Initialize(numberOfTrustees, threshold, numberOfSelections, trusteeState, baseHash);
             TrusteeApi.FreeTrusteeState(trusteeState);
         }
