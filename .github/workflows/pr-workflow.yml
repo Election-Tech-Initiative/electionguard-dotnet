@@ -75,7 +75,7 @@ jobs:
         Write-Host $command
         Invoke-Expression $command
     - name: Test
-      if:
+      if: false # Disabled
       run: dotnet test -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
