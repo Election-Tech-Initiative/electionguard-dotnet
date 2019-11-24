@@ -51,7 +51,7 @@ namespace ElectionGuard.SDK
                 ElectionMetadata = "placeholder", // TODO: something out of the electionManifest?
             };
 
-            // Set up trustee states array to be marshalled into the api to assign
+            // Set up trustee states array to be allocated in the api
             var trusteeStates = new SerializedBytes[MaxValues.MaxTrustees];
 
             // Call the C library API to create the election and get back the joint public key bytes
@@ -72,6 +72,7 @@ namespace ElectionGuard.SDK
                 }
             }
 
+            // Free bytes in unmanaged memory
             API.FreeCreateElection(jointPublicKey, trusteeStates);
         }
 
