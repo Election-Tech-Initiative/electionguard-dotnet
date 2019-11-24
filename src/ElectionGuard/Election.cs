@@ -71,6 +71,8 @@ namespace ElectionGuard.SDK
                     TrusteeKeys.Add(i, trusteeStateKeys);
                 }
             }
+
+            API.FreeCreateElection(jointPublicKey, trusteeStates);
         }
 
         private void CalculateSelections(ElectionManifest electionManifest)
