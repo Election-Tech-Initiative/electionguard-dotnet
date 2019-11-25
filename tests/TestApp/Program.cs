@@ -12,6 +12,13 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
+            var config = new ElectionGuardConfig()
+            {
+                NumberOfTrustees = 3,
+                Threshold = 3,
+                SubgroupOrder = 0,
+                ElectionMetadata = "placeholder",
+            };
             var manifest = new ElectionManifest()
             {
                 Contests = new Contest[]{ new YesNoContest()
@@ -19,7 +26,9 @@ namespace TestApp
                     Type = "YesNo"
                 } },
             };
-            var election = new Election(3, 3, manifest);
+
+            var result = Election.CreateElection(config, manifest);
+
         }
     }
 }

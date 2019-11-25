@@ -1,4 +1,5 @@
 ﻿using ElectionGuard.SDK.Models;
+using ElectionGuard.SDK.Models.ElectionGuardAPI;
 using System;
 using System.Runtime.InteropServices;
 

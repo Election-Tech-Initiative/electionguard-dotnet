@@ -1,82 +1,62 @@
 ﻿using ElectionGuard.SDK.Config;
 using ElectionGuard.SDK.Models;
+using ElectionGuard.SDK.Models.ElectionGuardAPI;
 using ElectionGuard.SDK.Serialization;
 using System;
 using System.Collections.Generic;
 
 namespace ElectionGuard.SDK
 {
-    public class Election
+    public static class Election
     {
-        public Election (int numberOfTrustees, int threshold, ElectionManifest electionManifest)
+
+        public static CreateElectionResult CreateElection(ElectionGuardConfig initialConfig, ElectionManifest electionManifest)
         {
-            Profile = electionManifest;
-            BallotTrackerConfig = electionManifest.BallotTrackerConfig ?? new BallotTrackerConfig()
-            {
-                TrackerType = DefaultTracker.Type,
-                TrackerSiteDisplay = DefaultTracker.SiteDisplay,
-                TrackerUrlTemplate = DefaultTracker.SiteDisplay,
-            };
-            NumberOfTrustees = numberOfTrustees;
-            Threshold = threshold;
-            PublicJointKey = null;
-            TrusteeKeys = new Dictionary<int, string>();
-            NumberOfSelections = 0;
-
-            CreateElection(electionManifest);
-            CalculateSelections(electionManifest);
-        }
-
-        public ElectionProfile Profile { get; set; }
-
-        public BallotTrackerConfig BallotTrackerConfig { get; set; }
-
-        public int NumberOfTrustees { get; }
-
-        public int Threshold { get; }
-
-        public string PublicJointKey { get; private set; }
-
-        public Dictionary<int, string> TrusteeKeys { get; private set; }
-
-        public int NumberOfSelections { get; private set; }
-
-        private void CreateElection(ElectionManifest electionManifest)
-        {
-            var config = new APIConfig
-            {
-                NumberOfTrustees = (uint)NumberOfTrustees,
-                Threshold = (uint)Threshold,
-                SubgroupOrder = 0, // TODO: something out of the electionManifest?
-                ElectionMetadata = "placeholder", // TODO: something out of the electionManifest?
-            };
+            var apiConfig = initialConfig.GetApiConfig();
+            apiConfig.NumberOfSelections = (uint)CalculateSelections(electionManifest);
 
             // Set up trustee states array to be allocated in the api
             var trusteeStates = new SerializedBytes[MaxValues.MaxTrustees];
-
-            // Call the C library API to create the election and get back the joint public key bytes
-            // The trusteeStates array should be filled out with the appropriate serialized returns as well
-            var jointPublicKey = API.CreateElection(config, trusteeStates);
-
-            // Convert the joint public key to a base64 string that can be stored by a client
-            PublicJointKey = ByteSerializer.ConvertToBase64String(jointPublicKey);
-
-            // Iterate through the trusteeStates returned and convert each to its base64 reprentation
-            for(var i = 0; i < trusteeStates.Length; i++)
+            
+            try
             {
-                var trusteeState = trusteeStates[i];
-                if (trusteeState.Length > 0)
-                {
-                    var trusteeStateKeys = ByteSerializer.ConvertToBase64String(trusteeState);
-                    TrusteeKeys.Add(i, trusteeStateKeys);
-                }
-            }
+                // Call the C library API to create the election and get back the joint public key bytes
+                // The trusteeStates array should be filled out with the appropriate serialized returns as well
+                var success = ElectionGuardAPI.CreateElection(ref apiConfig, trusteeStates);
 
-            // Free bytes in unmanaged memory
-            API.FreeCreateElection(jointPublicKey, trusteeStates);
+                if (!success)
+                {
+                    throw new Exception("ElectionGuardAPI.CreateElection failed");
+                }
+
+                ElectionGuardConfig electionGuardConfig = new ElectionGuardConfig(apiConfig);
+
+                Dictionary<int, string> trusteeKeys = new Dictionary<int, string>();
+                // Iterate through the trusteeStates returned and convert each to its base64 reprentation
+                for (var i = 0; i < trusteeStates.Length; i++)
+                {
+                    var trusteeState = trusteeStates[i];
+                    if (trusteeState.Length > 0)
+                    {
+                        var trusteeStateKeys = ByteSerializer.ConvertToBase64String(trusteeState);
+                        trusteeKeys.Add(i, trusteeStateKeys);
+                    }
+                }
+
+                return new CreateElectionResult()
+                {
+                    ElectionGuardConfig = electionGuardConfig,
+                    TrusteeKeys = trusteeKeys
+                };
+            }
+            finally
+            {
+                // Free bytes in unmanaged memory
+                ElectionGuardAPI.FreeCreateElection(apiConfig.SerializedJointPublicKey, trusteeStates);
+            }
         }
 
-        private void CalculateSelections(ElectionManifest electionManifest)
+        public static int CalculateSelections(ElectionManifest electionManifest)
         {
             var numberOfSelections = 0;
             foreach (var contest in electionManifest.Contests)
@@ -105,7 +85,7 @@ namespace ElectionGuard.SDK
             {
                 throw new Exception("Election has no selections");
             }
-            NumberOfSelections = numberOfSelections;
+            return numberOfSelections;
         }
     }
 }

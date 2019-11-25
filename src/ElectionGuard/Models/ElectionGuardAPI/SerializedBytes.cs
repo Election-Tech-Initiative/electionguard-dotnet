@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ElectionGuard.SDK.Models
+namespace ElectionGuard.SDK.Models.ElectionGuardAPI
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct SerializedBytes

@@ -21,10 +21,7 @@ namespace UnitTests
     [TestFixture(3, 3, 1, 3)]
     public class SimpleElectionTest
     {
-        private readonly int _numberOfTrustees;
-        private readonly int _threshold;
-        private readonly int _numberOfEncrypters;
-        private readonly int _numberOfBallotsPerEncrypter;
+        private ElectionGuardConfig _electionGuardConfig;
         private readonly ElectionManifest _electionManifest;
 
         // Key Ceremony
@@ -50,12 +47,15 @@ namespace UnitTests
         private byte[] _decryptionRequestPresent;
         private const string TallyPrefix = "tally";
 
-        public SimpleElectionTest(int numberOfTrustees, int threshold, int numberOfEncrypters, int numberOfBallotsPerEncrypter)
+        public SimpleElectionTest(int numberOfTrustees, int threshold)
         {
-            _numberOfTrustees = numberOfTrustees;
-            _threshold = threshold;
-            _numberOfEncrypters = numberOfEncrypters;
-            _numberOfBallotsPerEncrypter = numberOfBallotsPerEncrypter;
+            _electionGuardConfig = new ElectionGuardConfig()
+            {
+                NumberOfTrustees = numberOfTrustees,
+                Threshold = threshold,
+                SubgroupOrder = 0,
+                ElectionMetadata = "placeholder",
+            };
             _electionManifest = new ElectionManifest()
             {
                 Contests = new Contest[]{ new YesNoContest()
@@ -69,15 +69,15 @@ namespace UnitTests
         [Category(KeyCeremonyStage)]
         public void Step01_InitializeElection()
         {
-            var election = new Election(_numberOfTrustees, _threshold, _electionManifest);
+            var result = Election.CreateElection(_electionGuardConfig, _electionManifest);
 
-            _jointKey = election.PublicJointKey;
+            _jointKey = result.ElectionGuardConfig.JointPublicKey;
             Assert.That(string.IsNullOrEmpty(_jointKey), Is.False);
 
-            _trusteeKeys = election.TrusteeKeys;
-            Assert.AreEqual(_numberOfTrustees, _trusteeKeys.Count);
+            _trusteeKeys = result.TrusteeKeys;
+            Assert.AreEqual(result.ElectionGuardConfig.NumberOfTrustees, _trusteeKeys.Count);
 
-            _numberOfSelections = election.NumberOfSelections;
+            _numberOfSelections = result.ElectionGuardConfig.NumberOfSelections;
             Assert.Greater(_numberOfSelections, 0);
             var expectedNumberOfSelections = 3;
             Assert.AreEqual(expectedNumberOfSelections, _numberOfSelections);
