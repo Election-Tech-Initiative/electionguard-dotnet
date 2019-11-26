@@ -2,7 +2,7 @@
 # 🗳️ ElectionGuard SDK C#
 
 ![build](https://github.com/microsoft/ElectionGuard-SDK-CSharp/workflows/Package/badge.svg)
-[![nuget](https://img.shields.io/nuget/dt/ElectionGuard-SDK-CSharp)]()
+[![nuget](https://img.shields.io/nuget/dt/ElectionGuard.SDK)](https://www.nuget.org/packages/ElectionGuard.SDK)
 [![license](https://img.shields.io/github/license/microsoft/ElectionGuard-SDK-CSharp)](.License)
 
 This is a C# wrapper for the core SDK that performs election functions such as vote encryption, decryption, key generation, and tallying. This code is meant to be run on voting system hardware and to be integrated into existing (or new) voting system software. The ElectionGuard SDK is meant to add end-to-end verifiability and encryption into 3rd party comprehensive voting systems. 
