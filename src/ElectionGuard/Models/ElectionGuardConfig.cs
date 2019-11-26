@@ -1,4 +1,3 @@
-using ElectionGuard.SDK.Models.ElectionGuardAPI;
 using ElectionGuard.SDK.Serialization;
 
 namespace ElectionGuard.SDK.Models
@@ -49,7 +48,6 @@ namespace ElectionGuard.SDK.Models
                 Threshold = (uint)Threshold,
                 SubgroupOrder = (uint)SubgroupOrder,
                 ElectionMetadata = ElectionMetadata,
-                SerializedJointPublicKey = JointPublicKey == null ? new SerializedBytes() : ByteSerializer.ConvertFromBase64String(JointPublicKey),
             };
         }
     }

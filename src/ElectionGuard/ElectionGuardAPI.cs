@@ -29,15 +29,22 @@ namespace ElectionGuard.SDK
         internal static extern void FreeCreateElection(SerializedBytes jointPublicKey, SerializedBytes[] trusteeStates);
 
         /// <summary>
-        /// 
+        /// Encrypts the ballot selections for the given API Config
         /// </summary>
         /// <param name="selections"></param>
         /// <param name="config"></param>
-        /// <param name="jointPublicKey"></param>
         /// <param name="currentNumberOfBallots"></param>
+        /// <param name="ballotId"></param>
+        /// <param name="encryptedBallotMessage"></param>
+        /// <param name="trackerPtr"></param>
         /// <returns></returns>
         [DllImport("electionguard", EntryPoint = "API_EncryptBallot")]
-        internal static extern APIEncryptBallotResult EncryptBallot(bool[] selections, APIConfig config, SerializedBytes jointPublicKey, [In, Out] IntPtr currentNumberOfBallots);
+        internal static extern bool EncryptBallot(bool[] selections,
+                                                  APIConfig config,
+                                                  ref ulong currentNumberOfBallots,
+                                                  out ulong ballotIdPtr,
+                                                  out SerializedBytes encryptedBallotMessage,
+                                                  out IntPtr trackerPtr);
 
         /// <summary>
         /// Free memory for bytes allocated by EncryptBallot call
@@ -45,6 +52,6 @@ namespace ElectionGuard.SDK
         /// <param name="encryptedBallotMessage">the Serialized Bytes representation of the encrypted ballot message</param>
         /// <param name="tracker">the string of the tracker</param>
         [DllImport("electionguard", EntryPoint = "API_EncryptBallot_free")]
-        internal static extern void FreeEncryptBallot(SerializedBytes encryptedBallotMessage, string tracker);
+        internal static extern void FreeEncryptBallot(SerializedBytes encryptedBallotMessage, IntPtr tracker);
     }
 }

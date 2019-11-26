@@ -31,15 +31,19 @@ namespace ElectionGuard.SDK.Serialization
         /// </summary>
         /// <param name="bytesString">baes 64 string representing the serialized bytes data</param>
         /// <returns>serialized bytes struct that can be marshalled back to the C API</returns>
-        public static SerializedBytes ConvertFromBase64String(string bytesString)
+        public static SerializedBytesWithGCHandle ConvertFromBase64String(string bytesString)
         {
-            var bytesPtr = new IntPtr();
             var byteArray = Convert.FromBase64String(bytesString);
-            Marshal.Copy(byteArray, 0, bytesPtr, byteArray.Length);
-            return new SerializedBytes
+            var handle = GCHandle.Alloc(byteArray, GCHandleType.Pinned);
+            var bytes = new SerializedBytes()
             {
                 Length = (ulong) byteArray.Length,
-                Bytes = bytesPtr,
+                Bytes = handle.AddrOfPinnedObject(),
+            };
+            return new SerializedBytesWithGCHandle()
+            {
+                SerializedBytes = bytes,
+                Handle = handle,
             };
         }
     }
