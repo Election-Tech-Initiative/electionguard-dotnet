@@ -19,6 +19,8 @@ jobs:
     - name: Build and Package
       run:  |
         commit="${{ github.sha }}"
-        dotnet build -c Release --version-suffix "${commit:0:7}"
-    - name: Push
+        dotnet build -c Release --version-suffix "v${commit:0:7}"
+    - name: Push to GitHub Package Registry
       run: dotnet nuget push src/ElectionGuard/bin/Release/*.nupkg --source "github"
+    - name: Push to Nuget.org
+      run: dotnet nuget push src/ElectionGuard/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
