@@ -18,7 +18,7 @@ using DecryptionTrusteeStatus = ElectionGuard.SDK.Decryption.Trustee.TrusteeStat
 
 namespace UnitTests
 {
-    [TestFixture(3, 3, 1, 3)]
+    [TestFixture(3, 3)]
     public class SimpleElectionTest
     {
         private ElectionGuardConfig _electionGuardConfig;
@@ -26,26 +26,23 @@ namespace UnitTests
 
         // Key Ceremony
         private const string KeyCeremonyStage = "Key Ceremony";
-        private string _baseHashCode;
-        private string _jointKey;
         private Dictionary<int, string> _trusteeKeys;
-        private int _numberOfSelections;
 
         // Voting
         private const string VotingStage = "Voting";
-        private CryptographyParameters _parameters;
-        private VotingCoordinator _votingCoordinator;
-        private List<VotingEncrypter> _votingEncrypters;
-        private const string VotingResultsPrefix = "voting_result";
-        private File _votingResultsFile;
+        //private CryptographyParameters _parameters;
+        //private VotingCoordinator _votingCoordinator;
+        //private List<VotingEncrypter> _votingEncrypters;
+        //private const string VotingResultsPrefix = "voting_result";
+        //private File _votingResultsFile;
 
         // Decryption
         private const string DecryptionStage = "Decryption";
-        private DecryptionCoordinator _decryptionCoordinator;
-        private List<DecryptionTrustee> _decryptionTrustees;
-        private DecryptionFragmentsRequest[] _decryptionFragmentsRequests;
-        private byte[] _decryptionRequestPresent;
-        private const string TallyPrefix = "tally";
+        //private DecryptionCoordinator _decryptionCoordinator;
+        //private List<DecryptionTrustee> _decryptionTrustees;
+        //private DecryptionFragmentsRequest[] _decryptionFragmentsRequests;
+        //private byte[] _decryptionRequestPresent;
+        //private const string TallyPrefix = "tally";
 
         public SimpleElectionTest(int numberOfTrustees, int threshold)
         {
@@ -70,17 +67,35 @@ namespace UnitTests
         public void Step01_InitializeElection()
         {
             var result = Election.CreateElection(_electionGuardConfig, _electionManifest);
+            _electionGuardConfig = result.ElectionGuardConfig;
 
-            _jointKey = result.ElectionGuardConfig.JointPublicKey;
-            Assert.That(string.IsNullOrEmpty(_jointKey), Is.False);
+            Assert.That(string.IsNullOrEmpty(_electionGuardConfig.JointPublicKey), Is.False);
 
             _trusteeKeys = result.TrusteeKeys;
             Assert.AreEqual(result.ElectionGuardConfig.NumberOfTrustees, _trusteeKeys.Count);
 
-            _numberOfSelections = result.ElectionGuardConfig.NumberOfSelections;
-            Assert.Greater(_numberOfSelections, 0);
+            Assert.Greater(_electionGuardConfig.NumberOfSelections, 0);
             var expectedNumberOfSelections = 3;
-            Assert.AreEqual(expectedNumberOfSelections, _numberOfSelections);
+            Assert.AreEqual(expectedNumberOfSelections, result.ElectionGuardConfig.NumberOfSelections);
+        }
+
+        [Test, Order(2), NonParallelizable]
+        [Category(VotingStage)]
+        public void Step02_VotingAndEncryption()
+        {
+            // encrypts 3 random ballots
+            var currentNumBallots = 0;
+            var totalBallots = 3;
+            while (currentNumBallots < totalBallots)
+            {
+                var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections);
+                var result = Vote.EncryptBallot(randomBallot, _electionGuardConfig, currentNumBallots);
+                Assert.IsNotNull(result.EncryptedBallotMessage);
+                Assert.IsNotNull(result.Tracker);
+                Assert.AreEqual(result.Identifier, currentNumBallots);
+                Assert.Greater(result.CurrentNumberOfBallots, currentNumBallots);
+                currentNumBallots = (int)result.CurrentNumberOfBallots;
+            }
         }
 
         //        [Test, Order(2), NonParallelizable]
