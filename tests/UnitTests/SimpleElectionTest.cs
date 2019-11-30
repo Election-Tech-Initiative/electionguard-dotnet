@@ -84,7 +84,7 @@ namespace UnitTests
                 // generates new random ballot
                 var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections);
 
-                var result = Voting.EncryptBallot(randomBallot, _electionGuardConfig, currentNumBallots);
+                var result = Election.EncryptBallot(randomBallot, _electionGuardConfig, currentNumBallots);
 
                 Assert.IsNotEmpty(result.EncryptedBallotMessage);
                 Assert.IsNotEmpty(result.Tracker);
@@ -118,7 +118,7 @@ namespace UnitTests
                 }
             }
 
-            var success = Voting.RecordBallots(_electionGuardConfig,
+            var success = Election.RecordBallots(_electionGuardConfig,
                                                _encryptedBallots,
                                                castedIds,
                                                spoiledIds,

@@ -12,7 +12,7 @@ namespace ElectionGuard.SDK.Models
         /// Overloaded constructor initializes going from unmanaged struct format to expected managed C# class
         /// </summary>
         /// <param name="apiConfig"></param>
-        public ElectionGuardConfig(SDK.ElectionGuardAPI.APIConfig apiConfig)
+        internal ElectionGuardConfig(APIConfig apiConfig)
         {
             NumberOfSelections = (int)apiConfig.NumberOfSelections;
             NumberOfTrustees = (int)apiConfig.NumberOfTrustees;
@@ -39,9 +39,9 @@ namespace ElectionGuard.SDK.Models
         /// </summary>
         /// <param name="electionGuardConfig"></param>
         /// <returns></returns>
-        public SDK.ElectionGuardAPI.APIConfig GetApiConfig()
+        internal APIConfig GetApiConfig()
         {
-            return new SDK.ElectionGuardAPI.APIConfig()
+            return new APIConfig()
             {
                 NumberOfSelections = (uint)NumberOfSelections,
                 NumberOfTrustees = (uint)NumberOfTrustees,

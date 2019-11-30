@@ -2,9 +2,9 @@
 
 namespace ElectionGuard.SDK.ElectionGuardAPI
 {
-    public class SerializedBytesWithGCHandle
+    internal class SerializedBytesWithGCHandle
     {
-        public SerializedBytes SerializedBytes { get; set; }
-        public GCHandle Handle { get; set; }
+        internal SerializedBytes SerializedBytes { get; set; }
+        internal GCHandle Handle { get; set; }
     }
 }

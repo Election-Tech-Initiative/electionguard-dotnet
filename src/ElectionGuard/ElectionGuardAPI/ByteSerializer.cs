@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ElectionGuard.SDK.ElectionGuardAPI
 {
-    public static class ByteSerializer
+    internal static class ByteSerializer
     {
         /// <summary>
         /// Converts from a Serialized Bytes struct to the base 64 string
@@ -14,7 +14,7 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
         ///     unmanaged byte array and the length of the byte array
         /// </param>
         /// <returns>base 64 representation of the byte array</returns>
-        public static string ConvertToBase64String(SerializedBytes serializedBytes)
+        internal static string ConvertToBase64String(SerializedBytes serializedBytes)
         {
             // Copy the the serialized bytes pointer to a managed byte array
             var byteArray = new byte[serializedBytes.Length];
@@ -29,7 +29,7 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
         /// </summary>
         /// <param name="bytesString">baes 64 string representing the serialized bytes data</param>
         /// <returns>serialized bytes struct that can be marshalled back to the C API</returns>
-        public static SerializedBytesWithGCHandle ConvertFromBase64String(string bytesString)
+        internal static SerializedBytesWithGCHandle ConvertFromBase64String(string bytesString)
         {
             var byteArray = Convert.FromBase64String(bytesString);
             var handle = GCHandle.Alloc(byteArray, GCHandleType.Pinned);

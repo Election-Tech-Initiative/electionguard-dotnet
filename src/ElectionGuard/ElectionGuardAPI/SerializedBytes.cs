@@ -10,9 +10,9 @@ using System.Runtime.InteropServices;
 namespace ElectionGuard.SDK.ElectionGuardAPI
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct SerializedBytes
+    internal struct SerializedBytes
     {
-        public ulong Length;
-        public IntPtr Bytes;
+        internal ulong Length;
+        internal IntPtr Bytes;
     }
 }

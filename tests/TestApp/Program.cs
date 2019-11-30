@@ -34,7 +34,7 @@ namespace TestApp
             // create predictable ballot selections (election.NumberOfSelections should 3 for a single YesNoContest)
             var selections = new bool[3] { false, true, false };
             var currentNumberOfBallots = 0;
-            var encryptBallotResult = Voting.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
+            var encryptBallotResult = Election.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
 
             Console.WriteLine($"encryptedBallotResult.id = {encryptBallotResult.Identifier}");
             Console.WriteLine($"tracker = {encryptBallotResult.Tracker}");
@@ -49,7 +49,7 @@ namespace TestApp
 
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var recordResult = Voting.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castedIds, spoiledIds);
+            var recordResult = Election.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castedIds, spoiledIds);
 
             Console.WriteLine($"RecordBallots recordResult = {recordResult}");
 
