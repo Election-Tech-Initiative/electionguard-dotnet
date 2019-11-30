@@ -1,4 +1,4 @@
-﻿using ElectionGuard.SDK.Cryptography;
+using ElectionGuard.SDK.Cryptography;
 using ElectionGuard.SDK.Models.ElectionGuardAPI;
 using ElectionGuard.SDK.StateManagement;
 using System;
@@ -39,7 +39,7 @@ namespace ElectionGuard.SDK
         /// <param name="trackerPtr"></param>
         /// <returns></returns>
         [DllImport("electionguard", EntryPoint = "API_EncryptBallot")]
-        internal static extern bool EncryptBallot(bool[] selections,
+        internal static extern bool EncryptBallot(ushort[] selections,
                                                   APIConfig config,
                                                   ref ulong currentNumberOfBallots,
                                                   out ulong ballotIdPtr,

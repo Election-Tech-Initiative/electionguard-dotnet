@@ -1,7 +1,9 @@
-﻿using ElectionGuard.SDK.Models;
+using ElectionGuard.SDK.Models;
 using ElectionGuard.SDK.Models.ElectionGuardAPI;
 using ElectionGuard.SDK.Serialization;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace ElectionGuard.SDK
@@ -15,9 +17,8 @@ namespace ElectionGuard.SDK
             apiConfig.SerializedJointPublicKey = serializedBytesWithGCHandle.SerializedBytes;
 
             var updatedNumberOfBallots = (ulong)currentNumberOfBallots;
-            //SerializedBytes encryptedBallotMessage = new SerializedBytes();
             var success = ElectionGuardAPI.EncryptBallot(
-                            selections,
+                            selections.Select(b => (ushort)(b ? 1 : 0)).ToArray(),
                             apiConfig,
                             ref updatedNumberOfBallots,
                             out ulong ballotId,

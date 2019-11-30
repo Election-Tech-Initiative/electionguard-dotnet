@@ -1,4 +1,4 @@
-﻿using ElectionGuard.SDK;
+using ElectionGuard.SDK;
 using ElectionGuard.SDK.Models;
 using System;
 
@@ -13,7 +13,7 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            var config = new ElectionGuardConfig()
+            var initialConfig = new ElectionGuardConfig()
             {
                 NumberOfTrustees = 3,
                 Threshold = 3,
@@ -28,12 +28,12 @@ namespace TestApp
                 } },
             };
 
-            var result = Election.CreateElection(config, manifest);
+            var electionResult = Election.CreateElection(initialConfig, manifest);
 
             // create predictable ballot selections (election.NumberOfSelections should 3 for a single YesNoContest)
-            var selections = new bool[3] { true, false, false };
+            var selections = new bool[3] { false, true, false };
             var currentNumberOfBallots = 0;
-            var encryptBallotResult = Vote.EncryptBallot(selections, result.ElectionGuardConfig, currentNumberOfBallots);
+            var encryptBallotResult = Vote.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
 
             Console.WriteLine($"encryptedBallotResult.id = {encryptBallotResult.Identifier}");
             Console.WriteLine($"tracker = {encryptBallotResult.Tracker}");
