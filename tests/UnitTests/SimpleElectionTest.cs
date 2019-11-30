@@ -7,7 +7,7 @@ using UnitTests.Mocks;
 
 namespace UnitTests
 {
-    [TestFixture(3, 3, 5, "exported_results", "test_ballots-")]
+    [TestFixture(3, 3, 5, "exported_results", "test_ballots-", "test_tally-")]
     public class SimpleElectionTest
     {
         private ElectionGuardConfig _electionGuardConfig;
@@ -15,6 +15,7 @@ namespace UnitTests
         private readonly int _numberOfBallots;
         private readonly string _exportFolder;
         private readonly string _ballotsPrefix;
+        private readonly string _tallyPrefix;
 
         // Key Ceremony
         private const string KeyCeremonyStage = "Key Ceremony";
@@ -24,11 +25,13 @@ namespace UnitTests
         private const string VotingStage = "Voting";
         private ICollection<string> _encryptedBallots;
         private ICollection<long> _ballotIds;
+        private string _ballotsFilename;
 
         // Decryption
         private const string DecryptionStage = "Decryption";
 
-        public SimpleElectionTest(int numberOfTrustees, int threshold, int numberOfBallots, string exportFolder, string ballotsPrefix)
+        public SimpleElectionTest(int numberOfTrustees, int threshold, int numberOfBallots,
+            string exportFolder, string ballotsPrefix, string tallyPrefix)
         {
             _electionGuardConfig = new ElectionGuardConfig()
             {
@@ -52,6 +55,7 @@ namespace UnitTests
 
             _exportFolder = exportFolder;
             _ballotsPrefix = ballotsPrefix;
+            _tallyPrefix = tallyPrefix;
             _numberOfBallots = numberOfBallots;
             _encryptedBallots = new List<string>();
             _ballotIds = new List<long>();
@@ -118,14 +122,30 @@ namespace UnitTests
                 }
             }
 
-            var output = Election.RecordBallots(_electionGuardConfig,
+            _ballotsFilename = Election.RecordBallots(_electionGuardConfig,
                                                 _encryptedBallots,
                                                 castedIds,
                                                 spoiledIds,
                                                 _exportFolder,
                                                 _ballotsPrefix);
 
-            Assert.IsNotNull(output);
+            Assert.IsNotNull(_ballotsFilename);
+        }
+
+        [Test, Order(4), NonParallelizable]
+        [Category(DecryptionStage)]
+        public void Step04_TallyVotes()
+        {
+            // assume we have the equivalent number of trustees present to the threshold number required
+            var numberOfTrusteesPresent = _electionGuardConfig.Threshold;
+            var tallyOutputFilename = Election.TallyVotes(_electionGuardConfig,
+                                             _trusteeKeys.Values,
+                                             numberOfTrusteesPresent,
+                                             _ballotsFilename,
+                                             _exportFolder,
+                                             _tallyPrefix);
+
+            Assert.IsNotNull(tallyOutputFilename);
         }
     }
 }

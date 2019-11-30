@@ -31,7 +31,7 @@ namespace TestApp
 
             var electionResult = Election.CreateElection(initialConfig, manifest);
 
-            // create predictable ballot selections (election.NumberOfSelections should 3 for a single YesNoContest)
+            // creates a single predictable ballot selections (election.NumberOfSelections should 3 for a single YesNoContest)
             var selections = new bool[3] { false, true, false };
             var currentNumberOfBallots = 0;
             var encryptBallotResult = Election.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
@@ -53,7 +53,13 @@ namespace TestApp
 
             Console.WriteLine($"RecordBallots outputted to file = {recordResult}");
 
+            // assume number of trustees present is the threshold
+            var numberOfTrusteesPresent = electionResult.ElectionGuardConfig.Threshold;
+            // does not pass in optional export path or prefix-filename
+            // will output voting results to CWD with default prefix
+            var tallyResult = Election.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult);
 
+            Console.WriteLine($"TallyVotes ouputted to file = {tallyResult}");
         }
     }
 }

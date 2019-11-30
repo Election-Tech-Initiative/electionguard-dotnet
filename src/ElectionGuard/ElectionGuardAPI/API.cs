@@ -83,5 +83,32 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
         /// <param name="outputFilname"></param>
         [DllImport("electionguard", EntryPoint = "API_RecordBallots_free")]
         internal static extern void FreeRecordBallots(IntPtr outputFilname);
+
+        /// <summary>
+        /// Tallys the ballots file and Decrypts the results into a different output file
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="trusteeStates"></param>
+        /// <param name="numberOfDecryptingTrustees"></param>
+        /// <param name="ballotsFilename"></param>
+        /// <param name="exportPath"></param>
+        /// <param name="exportFilenamePrefix"></param>
+        /// <param name="outputFilname"></param>
+        /// <returns></returns>
+        [DllImport("electionguard", EntryPoint = "API_TallyVotes")]
+        internal static extern bool TallyVotes(APIConfig config,
+                                               SerializedBytes[] trusteeStates,
+                                               uint numberOfDecryptingTrustees,
+                                               string ballotsFilename,
+                                               string exportPath,
+                                               string exportFilenamePrefix,
+                                               out IntPtr outputFilname);
+
+        /// <summary>
+        /// Free memory for bytes allocated by the TallyVotes call
+        /// </summary>
+        /// <param name="outputFilname"></param>
+        [DllImport("electionguard", EntryPoint = "API_TallyVotes_free")]
+        internal static extern void FreeTallyVotes(IntPtr outputFilname);
     }
 }
