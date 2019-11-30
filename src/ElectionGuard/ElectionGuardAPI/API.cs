@@ -1,12 +1,9 @@
-using ElectionGuard.SDK.Cryptography;
-using ElectionGuard.SDK.Models.ElectionGuardAPI;
-using ElectionGuard.SDK.StateManagement;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK
+namespace ElectionGuard.SDK.ElectionGuardAPI
 {
-    internal static class ElectionGuardAPI
+    internal static class API
     {
         /// <summary>
         /// CreateElection entry point into the C API
@@ -53,5 +50,30 @@ namespace ElectionGuard.SDK
         /// <param name="tracker">the string of the tracker</param>
         [DllImport("electionguard", EntryPoint = "API_EncryptBallot_free")]
         internal static extern void FreeEncryptBallot(SerializedBytes encryptedBallotMessage, IntPtr tracker);
+
+        /// <summary>
+        /// Registers all the ballots and records which ballots have been casted or spoiled.
+        /// Exports to ballot results to file.
+        /// </summary>
+        /// <param name="numberOfSelections"></param>
+        /// <param name="numberOfCastedBallots"></param>
+        /// <param name="numberOfSpoiledBallots"></param>
+        /// <param name="numberOfTotalBallots"></param>
+        /// <param name="castedBallotIds"></param>
+        /// <param name="spoiledBallotIds"></param>
+        /// <param name="encryptedBallotMessages"></param>
+        /// <param name="exportPath"></param>
+        /// <param name="exportFilenamePrefix"></param>
+        /// <returns></returns>
+        [DllImport("electionguard", EntryPoint = "API_RecordBallots")]
+        internal static extern bool RecordBallots(uint numberOfSelections,
+                                                  uint numberOfCastedBallots,
+                                                  uint numberOfSpoiledBallots,
+                                                  ulong numberOfTotalBallots,
+                                                  ulong[] castedBallotIds,
+                                                  ulong[] spoiledBallotIds,
+                                                  [In] SerializedBytes[] encryptedBallotMessages,
+                                                  string exportPath,
+                                                  string exportFilenamePrefix);
     }
 }

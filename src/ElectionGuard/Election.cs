@@ -1,7 +1,5 @@
-﻿using ElectionGuard.SDK.Config;
+﻿using ElectionGuard.SDK.ElectionGuardAPI;
 using ElectionGuard.SDK.Models;
-using ElectionGuard.SDK.Models.ElectionGuardAPI;
-using ElectionGuard.SDK.Serialization;
 using System;
 using System.Collections.Generic;
 
@@ -9,20 +7,19 @@ namespace ElectionGuard.SDK
 {
     public static class Election
     {
-
         public static CreateElectionResult CreateElection(ElectionGuardConfig initialConfig, ElectionManifest electionManifest)
         {
             var apiConfig = initialConfig.GetApiConfig();
             apiConfig.NumberOfSelections = (uint)CalculateSelections(electionManifest);
 
             // Set up trustee states array to be allocated in the api
-            var trusteeStates = new SerializedBytes[MaxValues.MaxTrustees];
+            var trusteeStates = new SerializedBytes[Constants.MaxTrustees];
             
             try
             {
                 // Call the C library API to create the election and get back the joint public key bytes
                 // The trusteeStates array should be filled out with the appropriate serialized returns as well
-                var success = ElectionGuardAPI.CreateElection(ref apiConfig, trusteeStates);
+                var success = API.CreateElection(ref apiConfig, trusteeStates);
 
                 if (!success)
                 {
@@ -31,7 +28,7 @@ namespace ElectionGuard.SDK
 
                 ElectionGuardConfig electionGuardConfig = new ElectionGuardConfig(apiConfig);
 
-                Dictionary<int, string> trusteeKeys = new Dictionary<int, string>();
+                var trusteeKeys = new Dictionary<int, string>();
                 // Iterate through the trusteeStates returned and convert each to its base64 reprentation
                 for (var i = 0; i < trusteeStates.Length; i++)
                 {
@@ -52,7 +49,7 @@ namespace ElectionGuard.SDK
             finally
             {
                 // Free bytes in unmanaged memory
-                ElectionGuardAPI.FreeCreateElection(apiConfig.SerializedJointPublicKey, trusteeStates);
+                API.FreeCreateElection(apiConfig.SerializedJointPublicKey, trusteeStates);
             }
         }
 
@@ -77,7 +74,7 @@ namespace ElectionGuard.SDK
                         break;
                 }
             }
-            if (numberOfSelections > MaxValues.MaxSelections)
+            if (numberOfSelections > Constants.MaxSelections)
             {
                 throw new Exception("Max Selections Exceeded.");
             }

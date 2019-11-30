@@ -1,5 +1,5 @@
-﻿using System;
-using ElectionGuard.SDK.Config;
+﻿using ElectionGuard.SDK;
+using System;
 
 namespace UnitTests.Mocks
 {
@@ -7,7 +7,7 @@ namespace UnitTests.Mocks
     {
         public static bool[] FillRandomBallot(int numberOfSelections)
         {
-            if (numberOfSelections > MaxValues.MaxSelections)
+            if (numberOfSelections > Constants.MaxSelections)
             {
                 throw new ArgumentOutOfRangeException(nameof(numberOfSelections));
             }

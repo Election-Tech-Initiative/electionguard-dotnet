@@ -5,11 +5,9 @@
  * the serialized data for keys, trustees, states, etc.
  */
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
-namespace ElectionGuard.SDK.Models.ElectionGuardAPI
+namespace ElectionGuard.SDK.ElectionGuardAPI
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct SerializedBytes

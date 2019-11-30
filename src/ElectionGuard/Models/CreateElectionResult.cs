@@ -8,6 +8,6 @@ namespace ElectionGuard.SDK.Models
     {
         public ElectionGuardConfig ElectionGuardConfig { get; set; }
 
-        public Dictionary<int, string> TrusteeKeys { get; set; }
+        public IDictionary<int, string> TrusteeKeys { get; set; }
     }
 }

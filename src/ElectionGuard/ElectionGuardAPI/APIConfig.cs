@@ -1,10 +1,6 @@
-using ElectionGuard.SDK.Config;
-using ElectionGuard.SDK.Cryptography;
-using ElectionGuard.SDK.StateManagement;
-using System;
 using System.Runtime.InteropServices;
 
-namespace ElectionGuard.SDK.Models.ElectionGuardAPI
+namespace ElectionGuard.SDK.ElectionGuardAPI
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct APIConfig
