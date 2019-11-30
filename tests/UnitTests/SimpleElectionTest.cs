@@ -118,14 +118,14 @@ namespace UnitTests
                 }
             }
 
-            var success = Election.RecordBallots(_electionGuardConfig,
-                                               _encryptedBallots,
-                                               castedIds,
-                                               spoiledIds,
-                                               _exportFolder,
-                                               _ballotsPrefix);
+            var output = Election.RecordBallots(_electionGuardConfig,
+                                                _encryptedBallots,
+                                                castedIds,
+                                                spoiledIds,
+                                                _exportFolder,
+                                                _ballotsPrefix);
 
-            Assert.IsTrue(success);
+            Assert.IsNotNull(output);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace ElectionGuard.SDK
 
                 if (!success)
                 {
-                    throw new Exception("ElectionGuardAPI.CreateElection failed");
+                    throw new Exception("ElectionGuardAPI CreateElection failed");
                 }
 
                 ElectionGuardConfig electionGuardConfig = new ElectionGuardConfig(apiConfig);
@@ -71,7 +71,7 @@ namespace ElectionGuard.SDK
                             out IntPtr trackerPtr);
             if (!success)
             {
-                throw new Exception("ElectionGuardAPI.EncryptBallot failed");
+                throw new Exception("ElectionGuardAPI EncryptBallot failed");
             }
 
             var result = new EncryptBallotResult()
@@ -89,12 +89,12 @@ namespace ElectionGuard.SDK
             return result;
         }
 
-        public static bool RecordBallots(ElectionGuardConfig electionGuardConfig,
-                                         ICollection<string> encryptedBallotMessages,
-                                         ICollection<long> castedBallotIds,
-                                         ICollection<long> spoiledBallotIds,
-                                         string exportPath = "",
-                                         string exportFilenamePrefix = "")
+        public static string RecordBallots(ElectionGuardConfig electionGuardConfig,
+                                           ICollection<string> encryptedBallotMessages,
+                                           ICollection<long> castedBallotIds,
+                                           ICollection<long> spoiledBallotIds,
+                                           string exportPath = "",
+                                           string exportFilenamePrefix = "")
         {
             var serializedBytesWithGCHandles = encryptedBallotMessages
                                                 .Select(message => ByteSerializer.ConvertFromBase64String(message));
@@ -109,14 +109,23 @@ namespace ElectionGuard.SDK
                                                          spoiledArray,
                                                          ballotsArray,
                                                          exportPath,
-                                                         exportFilenamePrefix);
-            // Free handles
+                                                         exportFilenamePrefix,
+                                                         out IntPtr outputFilenamePtr);
+            if (!success)
+            {
+                throw new Exception("ElectionGuardAPI RecordBallots failed");
+            }
+
+            string outputFilename = Marshal.PtrToStringAnsi(outputFilenamePtr);
+
+            // Free unmanaged memory
+            API.FreeRecordBallots(outputFilenamePtr);
             foreach (var result in serializedBytesWithGCHandles)
             {
                 result.Handle.Free();
             }
 
-            return success;
+            return outputFilename;
         }
 
         public static int CalculateSelections(ElectionManifest electionManifest)

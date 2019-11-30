@@ -51,7 +51,7 @@ namespace TestApp
             // will output voting results to CWD with default prefix
             var recordResult = Election.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castedIds, spoiledIds);
 
-            Console.WriteLine($"RecordBallots recordResult = {recordResult}");
+            Console.WriteLine($"RecordBallots outputted to file = {recordResult}");
 
 
         }
