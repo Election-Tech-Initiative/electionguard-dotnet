@@ -78,7 +78,7 @@ namespace ElectionGuard.SDK
 
             var updatedNumberOfBallots = (ulong)currentNumberOfBallots;
             var success = API.EncryptBallot(
-                            selections.Select(b => (ushort)(b ? 1 : 0)).ToArray(),
+                            selections.Select(b => (byte)(b ? 1 : 0)).ToArray(),
                             apiConfig,
                             ref updatedNumberOfBallots,
                             out ulong ballotId,
