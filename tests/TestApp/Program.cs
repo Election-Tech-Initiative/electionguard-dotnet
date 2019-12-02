@@ -23,16 +23,25 @@ namespace TestApp
             };
             var manifest = new ElectionManifest()
             {
-                Contests = new Contest[]{ new YesNoContest()
-                {
-                    Type = "YesNo"
-                } },
+                Contests = new Contest[]{ 
+                    new YesNoContest()
+                    {
+                        Type = "YesNo"
+                    },
+                    new YesNoContest()
+                    {
+                        Type = "YesNo"
+                    }
+                },
             };
 
             var electionResult = Election.CreateElection(initialConfig, manifest);
 
-            // creates a single predictable ballot selections (election.NumberOfSelections should 3 for a single YesNoContest)
-            var selections = new bool[3] { false, true, false };
+            // creates a single predictable ballot selections (election.NumberOfSelections should 6 for 2 sets of YesNoContest)
+            var selections = new bool[6] { false, true, false, false, false, false };
+            // NOTE: the array below currently fails because the C implementation doesnt support multiple true selections
+            // new bool[6] { false, true, false, false, true, false };
+
             var currentNumberOfBallots = 0;
             var encryptBallotResult = Election.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
 
