@@ -1,66 +1,211 @@
-﻿using System;
-using System.Collections.Generic;
-using ElectionGuard.SDK.KeyCeremony;
-using ElectionGuard.SDK.Config;
+﻿using ElectionGuard.SDK.ElectionGuardAPI;
 using ElectionGuard.SDK.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace ElectionGuard.SDK
 {
-    public class Election
+    public static class Election
     {
-        private byte[] _bashHash;
-        private readonly byte[] _testBaseHash = { 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-        public Election (int numberOfTrustees, int threshold, ElectionManifest electionManifest)
+        /// <summary>
+        /// CreateElection entry point - performs the initial KeyCermony process to generate public keys and trustee keys 
+        /// </summary>
+        /// <param name="initialConfig"></param>
+        /// <param name="electionManifest"></param>
+        /// <returns>CreateElectionResult containing the private trustee keys and
+        ///     the updated ElectionGuardConfig with the public key</returns>
+        public static CreateElectionResult CreateElection(ElectionGuardConfig initialConfig, ElectionManifest electionManifest)
         {
-            Profile = electionManifest;
-            BallotTrackerConfig = electionManifest.BallotTrackerConfig ?? new BallotTrackerConfig()
+            var apiConfig = initialConfig.GetApiConfig();
+            apiConfig.NumberOfSelections = (uint)CalculateSelections(electionManifest);
+
+            // Set up trustee states array to be allocated in the api
+            var trusteeStates = new SerializedBytes[Constants.MaxTrustees];
+            
+            try
             {
-                TrackerType = DefaultTracker.Type,
-                TrackerSiteDisplay = DefaultTracker.SiteDisplay,
-                TrackerUrlTemplate = DefaultTracker.SiteDisplay,
+                // Call the C library API to create the election and get back the joint public key bytes
+                // The trusteeStates array should be filled out with the appropriate serialized returns as well
+                var success = API.CreateElection(ref apiConfig, trusteeStates);
+
+                if (!success)
+                {
+                    throw new Exception("ElectionGuardAPI CreateElection failed");
+                }
+
+                ElectionGuardConfig electionGuardConfig = new ElectionGuardConfig(apiConfig);
+
+                var trusteeKeys = new Dictionary<int, string>();
+                // Iterate through the trusteeStates returned and convert each to its base64 reprentation
+                for (var i = 0; i < trusteeStates.Length; i++)
+                {
+                    var trusteeState = trusteeStates[i];
+                    if (trusteeState.Length > 0)
+                    {
+                        var trusteeStateKeys = ByteSerializer.ConvertToBase64String(trusteeState);
+                        trusteeKeys.Add(i, trusteeStateKeys);
+                    }
+                }
+
+                return new CreateElectionResult()
+                {
+                    ElectionGuardConfig = electionGuardConfig,
+                    TrusteeKeys = trusteeKeys
+                };
+            }
+            finally
+            {
+                // Free bytes in unmanaged memory
+                API.FreeCreateElection(apiConfig.SerializedJointPublicKey, trusteeStates);
+            }
+        }
+
+        /// <summary>
+        /// Encrypts the ballot selections
+        /// </summary>
+        /// <param name="selections"></param>
+        /// <param name="electionGuardConfig"></param>
+        /// <param name="currentNumberOfBallots"></param>
+        /// <returns>EncryptBallotResult containing the encrypted ballot, its id, its tracker string,
+        ///     and the updated current number of ballots that have been encrypted</returns>
+        public static EncryptBallotResult EncryptBallot(bool[] selections, ElectionGuardConfig electionGuardConfig, int currentNumberOfBallots)
+        {
+            var apiConfig = electionGuardConfig.GetApiConfig();
+            var serializedBytesWithGCHandle = ByteSerializer.ConvertFromBase64String(electionGuardConfig.JointPublicKey);
+            apiConfig.SerializedJointPublicKey = serializedBytesWithGCHandle.SerializedBytes;
+
+            var updatedNumberOfBallots = (ulong)currentNumberOfBallots;
+            var success = API.EncryptBallot(
+                            selections.Select(b => (byte)(b ? 1 : 0)).ToArray(),
+                            apiConfig,
+                            ref updatedNumberOfBallots,
+                            out ulong ballotId,
+                            out SerializedBytes encryptedBallotMessage,
+                            out IntPtr trackerPtr);
+            if (!success)
+            {
+                throw new Exception("ElectionGuardAPI EncryptBallot failed");
+            }
+
+            var result = new EncryptBallotResult()
+            {
+                CurrentNumberOfBallots = (long)updatedNumberOfBallots,
+                Identifier = (long)ballotId,
+                EncryptedBallotMessage = ByteSerializer.ConvertToBase64String(encryptedBallotMessage),
+                Tracker = Marshal.PtrToStringAnsi(trackerPtr),
             };
-            NumberOfTrustees = numberOfTrustees;
-            Threshold = threshold;
-            PublicJointKey = null;
-            TrusteeKeys = new Dictionary<int, string>();
-            NumberOfSelections = 0;
 
-            GenerateBaseHash();
-            KeyCeremony();
-            CalculateSelections(electionManifest);
+            // Free unmanaged memory
+            API.FreeEncryptBallot(encryptedBallotMessage, trackerPtr);
+            serializedBytesWithGCHandle.Handle.Free();
+
+            return result;
         }
 
-        public ElectionProfile Profile { get; set; }
-
-        public BallotTrackerConfig BallotTrackerConfig { get; set; }
-
-        public int NumberOfTrustees { get; }
-
-        public int Threshold { get; }
-
-        public string PublicJointKey { get; private set; }
-
-        public Dictionary<int, string> TrusteeKeys { get; private set; }
-
-        public int NumberOfSelections { get; private set; }
-
-        public string BaseHashCode => Convert.ToBase64String(_testBaseHash);
-
-        private void GenerateBaseHash()
+        /// <summary>
+        /// Registers all the ballots and records which ballots have been casted or spoiled
+        /// and exports encrypted ballots to a file
+        /// </summary>
+        /// <param name="electionGuardConfig"></param>
+        /// <param name="encryptedBallotMessages"></param>
+        /// <param name="castedBallotIds"></param>
+        /// <param name="spoiledBallotIds"></param>
+        /// <param name="exportPath"></param>
+        /// <param name="exportFilenamePrefix"></param>
+        /// <returns>The filename created containing the encrypted ballots and their state (registered/cast/spoiled)</returns>
+        public static string RecordBallots(ElectionGuardConfig electionGuardConfig,
+                                           ICollection<string> encryptedBallotMessages,
+                                           ICollection<long> castedBallotIds,
+                                           ICollection<long> spoiledBallotIds,
+                                           string exportPath = "",
+                                           string exportFilenamePrefix = "")
         {
-            // TODO Properly Generate Base Hash
-            _bashHash = _testBaseHash;
+            var serializedBytesWithGCHandles = encryptedBallotMessages
+                                                .Select(message => ByteSerializer.ConvertFromBase64String(message));
+            var ballotsArray = serializedBytesWithGCHandles.Select(result => result.SerializedBytes).ToArray();
+            var castedArray = castedBallotIds.Select(id => (ulong)id).ToArray();
+            var spoiledArray = spoiledBallotIds.Select(id => (ulong)id).ToArray();
+
+            var success = API.RecordBallots((uint)electionGuardConfig.NumberOfSelections,
+                                            (uint)castedBallotIds.Count,
+                                            (uint)spoiledBallotIds.Count,
+                                            (ulong)encryptedBallotMessages.Count,
+                                            castedArray,
+                                            spoiledArray,
+                                            ballotsArray,
+                                            exportPath,
+                                            exportFilenamePrefix,
+                                            out IntPtr outputFilenamePtr);
+            if (!success)
+            {
+                throw new Exception("ElectionGuardAPI RecordBallots failed");
+            }
+
+            string outputFilename = Marshal.PtrToStringAnsi(outputFilenamePtr);
+
+            // Free unmanaged memory
+            API.FreeRecordBallots(outputFilenamePtr);
+            foreach (var result in serializedBytesWithGCHandles)
+            {
+                result.Handle.Free();
+            }
+
+            return outputFilename;
         }
 
-        private void KeyCeremony()
+        /// <summary>
+        /// Tallys the ballots file and Decrypts the results into a different output file
+        /// </summary>
+        /// <param name="electionGuardConfig"></param>
+        /// <param name="trusteeKeys"></param>
+        /// <param name="numberOfTrusteesPresent"></param>
+        /// <param name="ballotsFilename"></param>
+        /// <param name="exportPath"></param>
+        /// <param name="exportFilenamePrefix"></param>
+        /// <returns>The filename created containing the tally results</returns>
+        public static string TallyVotes(ElectionGuardConfig electionGuardConfig,
+                                        ICollection<string> trusteeKeys,
+                                        int numberOfTrusteesPresent,
+                                        string ballotsFilename,
+                                        string exportPath = "",
+                                        string exportFilenamePrefix = "")
         {
-            var keyCeremonyProcessor = new KeyCeremonyProcessor(NumberOfTrustees, Threshold, _bashHash);
-            PublicJointKey = keyCeremonyProcessor.GeneratePublicJointKey();
-            TrusteeKeys = keyCeremonyProcessor.GenerateTrusteeKeys();
+            var apiConfig = electionGuardConfig.GetApiConfig();
+            var serializedBytesWithGCHandles = trusteeKeys.Select(message => ByteSerializer.ConvertFromBase64String(message));
+            var trusteeKeysArray = serializedBytesWithGCHandles.Select(result => result.SerializedBytes).ToArray();
+
+            var success = API.TallyVotes(apiConfig,
+                                         trusteeKeysArray,
+                                         (uint)numberOfTrusteesPresent,
+                                         ballotsFilename,
+                                         exportPath,
+                                         exportFilenamePrefix,
+                                         out IntPtr outputFilenamePtr);
+            if (!success)
+            {
+                throw new Exception("ElectionGuardAPI TallyVotes failed");
+            }
+
+            string outputFilename = Marshal.PtrToStringAnsi(outputFilenamePtr);
+
+            // Free unmanaged memory
+            API.FreeTallyVotes(outputFilenamePtr);
+            foreach (var result in serializedBytesWithGCHandles)
+            {
+                result.Handle.Free();
+            }
+
+            return outputFilename;
         }
 
-        private void CalculateSelections(ElectionManifest electionManifest)
+        /// <summary>
+        /// Calculates the number of selections based on the given ElectionManifest
+        /// </summary>
+        /// <param name="electionManifest"></param>
+        /// <returns>number of selections</returns>
+        public static int CalculateSelections(ElectionManifest electionManifest)
         {
             var numberOfSelections = 0;
             foreach (var contest in electionManifest.Contests)
@@ -81,7 +226,7 @@ namespace ElectionGuard.SDK
                         break;
                 }
             }
-            if (numberOfSelections > MaxValues.MaxSelections)
+            if (numberOfSelections > Constants.MaxSelections)
             {
                 throw new Exception("Max Selections Exceeded.");
             }
@@ -89,7 +234,7 @@ namespace ElectionGuard.SDK
             {
                 throw new Exception("Election has no selections");
             }
-            NumberOfSelections = numberOfSelections;
+            return numberOfSelections;
         }
     }
 }
