@@ -1,5 +1,5 @@
-﻿using System;
-using ElectionGuard.SDK.Config;
+﻿using ElectionGuard.SDK;
+using System;
 
 namespace UnitTests.Mocks
 {
@@ -7,7 +7,7 @@ namespace UnitTests.Mocks
     {
         public static bool[] FillRandomBallot(int numberOfSelections)
         {
-            if (numberOfSelections > MaxValues.MaxSelections)
+            if (numberOfSelections > Constants.MaxSelections)
             {
                 throw new ArgumentOutOfRangeException(nameof(numberOfSelections));
             }
@@ -18,7 +18,7 @@ namespace UnitTests.Mocks
             {
                 if (!selected)
                 {
-                    selections[i] = true;
+                    selections[i] = RandomBit();
                 }
                 else
                 {
@@ -29,13 +29,18 @@ namespace UnitTests.Mocks
                     selected = true;
                 }
             }
+            if (!selected)
+            {
+                selections[numberOfSelections - 1] = true;
+            }
             return selections;
         }
 
         public static bool RandomBit()
         {
             var random = new Random();
-            return random.Next() > (int.MaxValue / 2);
+            var nextRand = random.Next(2);
+            return nextRand == 0;
         }
     }
 }
