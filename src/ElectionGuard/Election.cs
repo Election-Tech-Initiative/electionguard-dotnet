@@ -178,16 +178,17 @@ namespace ElectionGuard.SDK
         /// <param name="exportPath"></param>
         /// <param name="exportFilenamePrefix"></param>
         /// <returns>The filename created containing the tally results</returns>
-        public static string TallyVotes(ElectionGuardConfig electionGuardConfig,
-                                        ICollection<string> trusteeKeys,
-                                        int numberOfTrusteesPresent,
-                                        string ballotsFilename,
-                                        string exportPath = "",
-                                        string exportFilenamePrefix = "")
+        public static TallyVotesResult TallyVotes(ElectionGuardConfig electionGuardConfig,
+                                                  ICollection<string> trusteeKeys,
+                                                  int numberOfTrusteesPresent,
+                                                  string ballotsFilename,
+                                                  string exportPath = "",
+                                                  string exportFilenamePrefix = "")
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
             var serializedBytesWithGCHandles = trusteeKeys.Select(message => ByteSerializer.ConvertFromBase64String(message));
             var trusteeKeysArray = serializedBytesWithGCHandles.Select(result => result.SerializedBytes).ToArray();
+            var tallyResults = new uint[electionGuardConfig.NumberOfSelections];
 
             var success = API.TallyVotes(apiConfig,
                                          trusteeKeysArray,
@@ -195,22 +196,27 @@ namespace ElectionGuard.SDK
                                          ballotsFilename,
                                          exportPath,
                                          exportFilenamePrefix,
-                                         out IntPtr outputFilenamePtr);
+                                         out IntPtr outputFilenamePtr,
+                                         tallyResults);
             if (!success)
             {
                 throw new Exception("ElectionGuardAPI TallyVotes failed");
             }
 
-            string outputFilename = Marshal.PtrToStringAnsi(outputFilenamePtr);
+            var result = new TallyVotesResult()
+            {
+                EncryptedTallyFilename = Marshal.PtrToStringAnsi(outputFilenamePtr),
+                TallyResults = tallyResults.Cast<int>().ToArray(),
+            };
 
             // Free unmanaged memory
             API.FreeTallyVotes(outputFilenamePtr);
-            foreach (var result in serializedBytesWithGCHandles)
+            foreach (var bytes in serializedBytesWithGCHandles)
             {
-                result.Handle.Free();
+                bytes.Handle.Free();
             }
 
-            return outputFilename;
+            return result;
         }
 
         /// <summary>
