@@ -12,7 +12,7 @@ jobs:
     name: 'Linux Build'
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Output Verbose Logging for Linux
@@ -56,7 +56,7 @@ jobs:
     name: 'Windows Build'
     runs-on: 'windows-latest'
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Output Verbose Logging for Windows
@@ -98,7 +98,7 @@ jobs:
     name: 'MacOS Build'
     runs-on: 'macOS-latest'
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Output Verbose Logging for MacOS
