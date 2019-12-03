@@ -16,6 +16,7 @@ namespace UnitTests
         private readonly string _exportFolder;
         private readonly string _ballotsPrefix;
         private readonly string _tallyPrefix;
+        private readonly int _expectedNumberOfSelected;
 
         // Key Ceremony
         private const string KeyCeremonyStage = "Key Ceremony";
@@ -59,6 +60,7 @@ namespace UnitTests
             _numberOfBallots = numberOfBallots;
             _encryptedBallots = new List<string>();
             _ballotIds = new List<long>();
+            _expectedNumberOfSelected = 2;
         }
 
         [Test, Order(1), NonParallelizable]
@@ -86,9 +88,9 @@ namespace UnitTests
             while (currentNumBallots < _numberOfBallots)
             {
                 // generates new random ballot
-                var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections);
+                var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections, _expectedNumberOfSelected);
 
-                var result = Election.EncryptBallot(randomBallot, _electionGuardConfig, currentNumBallots);
+                var result = Election.EncryptBallot(randomBallot, _expectedNumberOfSelected, _electionGuardConfig, currentNumBallots);
 
                 Assert.IsNotEmpty(result.EncryptedBallotMessage);
                 Assert.IsNotEmpty(result.Tracker);

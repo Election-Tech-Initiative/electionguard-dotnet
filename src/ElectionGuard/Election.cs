@@ -66,11 +66,12 @@ namespace ElectionGuard.SDK
         /// Encrypts the ballot selections
         /// </summary>
         /// <param name="selections"></param>
+        /// <param name="expectedNumberOfSelected"></param>
         /// <param name="electionGuardConfig"></param>
         /// <param name="currentNumberOfBallots"></param>
         /// <returns>EncryptBallotResult containing the encrypted ballot, its id, its tracker string,
         ///     and the updated current number of ballots that have been encrypted</returns>
-        public static EncryptBallotResult EncryptBallot(bool[] selections, ElectionGuardConfig electionGuardConfig, int currentNumberOfBallots)
+        public static EncryptBallotResult EncryptBallot(bool[] selections, int expectedNumberOfSelected, ElectionGuardConfig electionGuardConfig, int currentNumberOfBallots)
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
             var serializedBytesWithGCHandle = ByteSerializer.ConvertFromBase64String(electionGuardConfig.JointPublicKey);
@@ -79,6 +80,7 @@ namespace ElectionGuard.SDK
             var updatedNumberOfBallots = (ulong)currentNumberOfBallots;
             var success = API.EncryptBallot(
                             selections.Select(b => (byte)(b ? 1 : 0)).ToArray(),
+                            (uint)expectedNumberOfSelected,
                             apiConfig,
                             ref updatedNumberOfBallots,
                             out ulong ballotId,
