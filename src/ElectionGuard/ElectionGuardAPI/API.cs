@@ -75,14 +75,20 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
                                                   [In] SerializedBytes[] encryptedBallotMessages,
                                                   string exportPath,
                                                   string exportFilenamePrefix,
-                                                  out IntPtr outputFilname);
+                                                  out IntPtr outputFilname,
+                                                  [In, Out] IntPtr[] castedTrackerPtrs,
+                                                  [In, Out] IntPtr[] spoiledTrackerPtrs);
 
         /// <summary>
         /// Free memory for bytes allocated by the RecordBallots call
         /// </summary>
         /// <param name="outputFilname"></param>
         [DllImport("electionguard", EntryPoint = "API_RecordBallots_free")]
-        internal static extern void FreeRecordBallots(IntPtr outputFilname);
+        internal static extern void FreeRecordBallots(IntPtr outputFilname,
+                                                      uint numberOfCastedBallots,
+                                                      uint numberOfSpoiledBallots,
+                                                      IntPtr[] castedTrackerPtrs,
+                                                      IntPtr[] spoiledTrackerPtrs);
 
         /// <summary>
         /// Tallys the ballots file and Decrypts the results into a different output file
