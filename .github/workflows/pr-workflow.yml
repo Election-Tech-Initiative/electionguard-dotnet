@@ -33,7 +33,6 @@ jobs:
         command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
         eval $command
     - name: Test
-      if: false # Disabled
       run: dotnet test -c Release
     - name: Upload Linux artifacts
       uses: actions/upload-artifact@v1
@@ -75,7 +74,6 @@ jobs:
         Write-Host $command
         Invoke-Expression $command
     - name: Test
-      if: false # Disabled
       run: dotnet test -c Release
     - name: Upload Windows artifacts
       uses: actions/upload-artifact@v1
@@ -121,7 +119,6 @@ jobs:
         command="dotnet build -c Release --version-suffix ""${commit:0:7}"" $addl_params"
         eval $command
     - name: Test
-      if: false # Disabled
       run: dotnet test -c Release
     - name: Upload MacOS artifacts
       uses: actions/upload-artifact@v1
