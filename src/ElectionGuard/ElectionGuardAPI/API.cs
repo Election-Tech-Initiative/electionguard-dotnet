@@ -29,14 +29,16 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
         /// Encrypts the ballot selections for the given API Config
         /// </summary>
         /// <param name="selections"></param>
+        /// <param name="expectedNumberOfSelected"></param>
         /// <param name="config"></param>
         /// <param name="currentNumberOfBallots"></param>
-        /// <param name="ballotId"></param>
+        /// <param name="ballotIdPtr"></param>
         /// <param name="encryptedBallotMessage"></param>
         /// <param name="trackerPtr"></param>
         /// <returns></returns>
         [DllImport("electionguard", EntryPoint = "API_EncryptBallot")]
         internal static extern bool EncryptBallot(byte[] selections,
+                                                  uint expectedNumberOfSelected,
                                                   APIConfig config,
                                                   ref ulong currentNumberOfBallots,
                                                   out ulong ballotIdPtr,

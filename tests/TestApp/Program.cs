@@ -39,19 +39,18 @@ namespace TestApp
 
             // creates a single predictable ballot selections (election.NumberOfSelections should 6 for 2 sets of YesNoContest)
             var selections = new bool[4][] {
-                // NOTE: the array below currently fails because the C implementation doesnt support multiple true selections
-                // new bool[6] { false, true, false, false, true, false };
-                new bool[6] { false, true, false, false, false, false },
-                new bool[6] { true, false, false, false, false, false },
-                new bool[6] { true, false, false, false, false, false },
-                new bool[6] { false, false, false, true, false, false }
+                new bool[6] { false, true, false, false, true, false },
+                new bool[6] { true, false, false, true, false, false },
+                new bool[6] { true, false, false, false, true, false },
+                new bool[6] { false, false, true, false, true, false }
             };
 
+            var expectedNumberOfSelected = 2; // we have 2 true values in each of the selection arrays above
             var currentNumberOfBallots = 0;
             var encryptedBallotList = new List<string>();
             for (var i = 0; i < selections.Length; i++)
             { 
-                var encryptBallotResult = Election.EncryptBallot(selections[i], electionResult.ElectionGuardConfig, currentNumberOfBallots);
+                var encryptBallotResult = Election.EncryptBallot(selections[i], expectedNumberOfSelected, electionResult.ElectionGuardConfig, currentNumberOfBallots);
                 
                 currentNumberOfBallots = (int)encryptBallotResult.CurrentNumberOfBallots;
                 Console.WriteLine($"Encrypted Ballot {i}:");
