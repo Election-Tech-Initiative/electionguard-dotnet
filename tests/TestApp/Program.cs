@@ -86,7 +86,14 @@ namespace TestApp
             // will output voting results to CWD with default prefix
             var tallyResult = Election.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename);
 
-            Console.WriteLine($"TallyVotes ouputted to file = {tallyResult}");
+            var tallyIndex = 0;
+            Console.WriteLine("Tally Results:");
+            foreach(var tally in tallyResult.TallyResults)
+            {
+                Console.WriteLine($"\t{tallyIndex}: {tally}");
+                tallyIndex++;
+            }
+            Console.WriteLine($"TallyVotes ouputted to file = {tallyResult.EncryptedTallyFilename}");
         }
     }
 }

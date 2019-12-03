@@ -110,7 +110,8 @@ namespace ElectionGuard.SDK.ElectionGuardAPI
                                                string ballotsFilename,
                                                string exportPath,
                                                string exportFilenamePrefix,
-                                               out IntPtr outputFilname);
+                                               out IntPtr outputFilname,
+                                               [In, Out] uint[] tallyResults);
 
         /// <summary>
         /// Free memory for bytes allocated by the TallyVotes call

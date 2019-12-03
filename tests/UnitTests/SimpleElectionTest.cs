@@ -142,14 +142,15 @@ namespace UnitTests
         {
             // assume we have the equivalent number of trustees present to the threshold number required
             var numberOfTrusteesPresent = _electionGuardConfig.Threshold;
-            var tallyOutputFilename = Election.TallyVotes(_electionGuardConfig,
+            var result = Election.TallyVotes(_electionGuardConfig,
                                              _trusteeKeys.Values,
                                              numberOfTrusteesPresent,
                                              _ballotsFilename,
                                              _exportFolder,
                                              _tallyPrefix);
 
-            Assert.IsNotNull(tallyOutputFilename);
+            Assert.IsNotNull(result.EncryptedTallyFilename);
+            Assert.AreEqual(_electionGuardConfig.NumberOfSelections, result.TallyResults.Count);
         }
     }
 }
