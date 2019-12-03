@@ -122,13 +122,15 @@ namespace UnitTests
                 }
             }
 
-            _ballotsFilename = Election.RecordBallots(_electionGuardConfig,
+            var result = Election.RecordBallots(_electionGuardConfig,
                                                 _encryptedBallots,
                                                 castedIds,
                                                 spoiledIds,
                                                 _exportFolder,
                                                 _ballotsPrefix);
-
+            Assert.AreEqual(castedIds.Count, result.CastedBallotTrackers.Count);
+            Assert.AreEqual(spoiledIds.Count, result.SpoiledBallotTrackers.Count);
+            _ballotsFilename = result.EncryptedBallotsFilename;
             Assert.IsNotNull(_ballotsFilename);
         }
 

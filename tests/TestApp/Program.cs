@@ -38,35 +38,54 @@ namespace TestApp
             var electionResult = Election.CreateElection(initialConfig, manifest);
 
             // creates a single predictable ballot selections (election.NumberOfSelections should 6 for 2 sets of YesNoContest)
-            var selections = new bool[6] { false, true, false, false, false, false };
-            // NOTE: the array below currently fails because the C implementation doesnt support multiple true selections
-            // new bool[6] { false, true, false, false, true, false };
+            var selections = new bool[4][] {
+                // NOTE: the array below currently fails because the C implementation doesnt support multiple true selections
+                // new bool[6] { false, true, false, false, true, false };
+                new bool[6] { false, true, false, false, false, false },
+                new bool[6] { true, false, false, false, false, false },
+                new bool[6] { true, false, false, false, false, false },
+                new bool[6] { false, false, false, true, false, false }
+            };
 
             var currentNumberOfBallots = 0;
-            var encryptBallotResult = Election.EncryptBallot(selections, electionResult.ElectionGuardConfig, currentNumberOfBallots);
-
-            Console.WriteLine($"encryptedBallotResult.id = {encryptBallotResult.Identifier}");
-            Console.WriteLine($"tracker = {encryptBallotResult.Tracker}");
-            Console.WriteLine($"EncryptedBallotMessage.Length = {encryptBallotResult.EncryptedBallotMessage.Length}");
-            Console.WriteLine($"CurrentNumberOfBallots = {encryptBallotResult.CurrentNumberOfBallots}");
-
             var encryptedBallotList = new List<string>();
-            encryptedBallotList.Add(encryptBallotResult.EncryptedBallotMessage);
+            for (var i = 0; i < selections.Length; i++)
+            { 
+                var encryptBallotResult = Election.EncryptBallot(selections[i], electionResult.ElectionGuardConfig, currentNumberOfBallots);
+                
+                currentNumberOfBallots = (int)encryptBallotResult.CurrentNumberOfBallots;
+                Console.WriteLine($"Encrypted Ballot {i}:");
+                Console.WriteLine($"\tIdentifier = {encryptBallotResult.Identifier}");
+                Console.WriteLine($"\tTracker = {encryptBallotResult.Tracker}");
+                Console.WriteLine($"\tEncryptedBallotMessage.Length = {encryptBallotResult.EncryptedBallotMessage.Length}");
+                Console.WriteLine($"\tCurrentNumberOfBallots = {encryptBallotResult.CurrentNumberOfBallots}");
 
-            var castedIds = new List<long> { 0 };
-            var spoiledIds = new List<long> { };
+                encryptedBallotList.Add(encryptBallotResult.EncryptedBallotMessage);
+            }
+
+            var castedIds = new List<long> { 0, 3 };
+            var spoiledIds = new List<long> { 1, 2 };
 
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
             var recordResult = Election.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castedIds, spoiledIds);
 
-            Console.WriteLine($"RecordBallots outputted to file = {recordResult}");
+            Console.WriteLine($"RecordBallots casted trackers");
+            foreach (var casted in recordResult.CastedBallotTrackers) {
+                Console.WriteLine($"\t{casted}");
+            }
+            Console.WriteLine($"RecordBallots spoiled trackers");
+            foreach (var spoiled in recordResult.SpoiledBallotTrackers)
+            {
+                Console.WriteLine($"\t{spoiled}");
+            }
+            Console.WriteLine($"RecordBallots outputted to file = {recordResult.EncryptedBallotsFilename}");
 
             // assume number of trustees present is the threshold
             var numberOfTrusteesPresent = electionResult.ElectionGuardConfig.Threshold;
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var tallyResult = Election.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult);
+            var tallyResult = Election.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename);
 
             Console.WriteLine($"TallyVotes ouputted to file = {tallyResult}");
         }
