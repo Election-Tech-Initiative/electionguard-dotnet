@@ -9,7 +9,7 @@ jobs:
     name: 'Linux'
     runs-on: 'ubuntu-latest'
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v1
       with:
         submodules: true
     - name: Setup Commands
