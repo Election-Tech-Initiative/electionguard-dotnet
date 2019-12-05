@@ -1,8 +1,8 @@
-﻿using ElectionGuard.SDK;
-using ElectionGuard.SDK.Models;
+﻿using ElectionGuard.SDK.Models;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using ElectionGuard.SDK;
 using UnitTests.Mocks;
 
 namespace UnitTests
@@ -11,7 +11,6 @@ namespace UnitTests
     public class SimpleElectionTest
     {
         private ElectionGuardConfig _electionGuardConfig;
-        private readonly ElectionManifest _electionManifest;
         private readonly int _numberOfBallots;
         private readonly string _exportFolder;
         private readonly string _ballotsPrefix;
@@ -24,8 +23,8 @@ namespace UnitTests
 
         // Voting
         private const string VotingStage = "Voting";
-        private ICollection<string> _encryptedBallots;
-        private ICollection<long> _ballotIds;
+        private readonly ICollection<string> _encryptedBallots;
+        private readonly ICollection<long> _ballotIds;
         private string _ballotsFilename;
 
         // Decryption
@@ -37,16 +36,10 @@ namespace UnitTests
             _electionGuardConfig = new ElectionGuardConfig()
             {
                 NumberOfTrustees = numberOfTrustees,
+                NumberOfSelections = 3,
                 Threshold = threshold,
                 SubgroupOrder = 0,
                 ElectionMetadata = "placeholder",
-            };
-            _electionManifest = new ElectionManifest()
-            {
-                Contests = new Contest[]{ new YesNoContest()
-                {
-                    Type = "YesNo"
-                } },
             };
 
             if (!string.IsNullOrWhiteSpace(exportFolder))
@@ -67,7 +60,7 @@ namespace UnitTests
         [Category(KeyCeremonyStage)]
         public void Step01_InitializeElection()
         {
-            var result = Election.CreateElection(_electionGuardConfig, _electionManifest);
+            var result = ElectionGuardApi.CreateElection(_electionGuardConfig);
             _electionGuardConfig = result.ElectionGuardConfig;
 
             Assert.That(string.IsNullOrEmpty(_electionGuardConfig.JointPublicKey), Is.False);
@@ -90,7 +83,7 @@ namespace UnitTests
                 // generates new random ballot
                 var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections, _expectedNumberOfSelected);
 
-                var result = Election.EncryptBallot(randomBallot, _expectedNumberOfSelected, _electionGuardConfig, currentNumBallots);
+                var result = ElectionGuardApi.EncryptBallot(randomBallot, _expectedNumberOfSelected, _electionGuardConfig, currentNumBallots);
 
                 Assert.IsNotEmpty(result.EncryptedBallotMessage);
                 Assert.IsNotEmpty(result.Tracker);
@@ -108,7 +101,7 @@ namespace UnitTests
         [Category(VotingStage)]
         public void Step03_RecordBallots()
         {
-            var castedIds = new List<long>();
+            var castIds = new List<long>();
             var spoiledIds = new List<long>();
 
             // randomly assign to cast or spoil lists
@@ -116,7 +109,7 @@ namespace UnitTests
             {
                 if (BallotGenerator.RandomBit())
                 {
-                    castedIds.Add(id);
+                    castIds.Add(id);
                 }
                 else
                 {
@@ -124,13 +117,13 @@ namespace UnitTests
                 }
             }
 
-            var result = Election.RecordBallots(_electionGuardConfig,
+            var result = ElectionGuardApi.RecordBallots(_electionGuardConfig,
                                                 _encryptedBallots,
-                                                castedIds,
+                                                castIds,
                                                 spoiledIds,
                                                 _exportFolder,
                                                 _ballotsPrefix);
-            Assert.AreEqual(castedIds.Count, result.CastedBallotTrackers.Count);
+            Assert.AreEqual(castIds.Count, result.CastedBallotTrackers.Count);
             Assert.AreEqual(spoiledIds.Count, result.SpoiledBallotTrackers.Count);
             _ballotsFilename = result.EncryptedBallotsFilename;
             Assert.IsNotNull(_ballotsFilename);
@@ -142,7 +135,7 @@ namespace UnitTests
         {
             // assume we have the equivalent number of trustees present to the threshold number required
             var numberOfTrusteesPresent = _electionGuardConfig.Threshold;
-            var result = Election.TallyVotes(_electionGuardConfig,
+            var result = ElectionGuardApi.TallyVotes(_electionGuardConfig,
                                              _trusteeKeys.Values,
                                              numberOfTrusteesPresent,
                                              _ballotsFilename,
