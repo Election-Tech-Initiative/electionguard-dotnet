@@ -56,7 +56,8 @@ namespace TestApp
 
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var recordResult = ElectionGuardApi.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castIds, spoiledIds);
+            var recordResult = ElectionGuardApi.RecordBallots(
+                electionResult.ElectionGuardConfig, encryptedBallotList, castIds, spoiledIds, "./ballots", "my_election_ballots_");
 
             Console.WriteLine($"RecordBallots cast trackers");
             foreach (var cast in recordResult.CastedBallotTrackers) {
@@ -73,7 +74,9 @@ namespace TestApp
             var numberOfTrusteesPresent = electionResult.ElectionGuardConfig.Threshold;
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var tallyResult = ElectionGuardApi.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename);
+
+            var tallyResult = ElectionGuardApi.TallyVotes(
+                electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename, "./tallies", "my_election_tallies_");
 
             var tallyIndex = 0;
             Console.WriteLine("Tally Results:");
