@@ -1,25 +1,23 @@
 ﻿using ElectionGuard.SDK.ElectionGuardAPI;
-using ElectionGuard.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using ElectionGuard.SDK.Models;
 
 namespace ElectionGuard.SDK
 {
-    public static class Election
+    public static class ElectionGuardApi
     {
         /// <summary>
-        /// CreateElection entry point - performs the initial KeyCermony process to generate public keys and trustee keys 
+        /// CreateElection entry point - performs the initial KeyCeremony process to generate public keys and trustee keys 
         /// </summary>
         /// <param name="initialConfig"></param>
-        /// <param name="electionManifest"></param>
         /// <returns>CreateElectionResult containing the private trustee keys and
         ///     the updated ElectionGuardConfig with the public key</returns>
-        public static CreateElectionResult CreateElection(ElectionGuardConfig initialConfig, ElectionManifest electionManifest)
+        public static CreateElectionResult CreateElection(ElectionGuardConfig initialConfig)
         {
             var apiConfig = initialConfig.GetApiConfig();
-            apiConfig.NumberOfSelections = (uint)CalculateSelections(electionManifest);
 
             // Set up trustee states array to be allocated in the api
             var trusteeStates = new SerializedBytes[Constants.MaxTrustees];
@@ -35,10 +33,10 @@ namespace ElectionGuard.SDK
                     throw new Exception("ElectionGuardAPI CreateElection failed");
                 }
 
-                ElectionGuardConfig electionGuardConfig = new ElectionGuardConfig(apiConfig);
+                var electionGuardConfig = new ElectionGuardConfig(apiConfig);
 
                 var trusteeKeys = new Dictionary<int, string>();
-                // Iterate through the trusteeStates returned and convert each to its base64 reprentation
+                // Iterate through the trusteeStates returned and convert each to its base64 representation
                 for (var i = 0; i < trusteeStates.Length; i++)
                 {
                     var trusteeState = trusteeStates[i];
@@ -74,8 +72,8 @@ namespace ElectionGuard.SDK
         public static EncryptBallotResult EncryptBallot(bool[] selections, int expectedNumberOfSelected, ElectionGuardConfig electionGuardConfig, int currentNumberOfBallots)
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
-            var serializedBytesWithGCHandle = ByteSerializer.ConvertFromBase64String(electionGuardConfig.JointPublicKey);
-            apiConfig.SerializedJointPublicKey = serializedBytesWithGCHandle.SerializedBytes;
+            var serializedBytesWithGcHandle = ByteSerializer.ConvertFromBase64String(electionGuardConfig.JointPublicKey);
+            apiConfig.SerializedJointPublicKey = serializedBytesWithGcHandle.SerializedBytes;
 
             var updatedNumberOfBallots = (ulong)currentNumberOfBallots;
             var success = API.EncryptBallot(
@@ -101,48 +99,49 @@ namespace ElectionGuard.SDK
 
             // Free unmanaged memory
             API.FreeEncryptBallot(encryptedBallotMessage, trackerPtr);
-            serializedBytesWithGCHandle.Handle.Free();
+            serializedBytesWithGcHandle.Handle.Free();
 
             return result;
         }
 
         /// <summary>
-        /// Registers all the ballots and records which ballots have been casted or spoiled
+        /// Registers all the ballots and records which ballots have been cast or spoiled
         /// and exports encrypted ballots to a file
         /// </summary>
         /// <param name="electionGuardConfig"></param>
         /// <param name="encryptedBallotMessages"></param>
-        /// <param name="castedBallotIds"></param>
+        /// <param name="castBallotIds"></param>
         /// <param name="spoiledBallotIds"></param>
         /// <param name="exportPath"></param>
         /// <param name="exportFilenamePrefix"></param>
         /// <returns>The filename created containing the encrypted ballots and their state (registered/cast/spoiled)</returns>
         public static RecordBallotsResult RecordBallots(ElectionGuardConfig electionGuardConfig,
                                                         ICollection<string> encryptedBallotMessages,
-                                                        ICollection<long> castedBallotIds,
+                                                        ICollection<long> castBallotIds,
                                                         ICollection<long> spoiledBallotIds,
                                                         string exportPath = "",
                                                         string exportFilenamePrefix = "")
         {
-            var serializedBytesWithGCHandles = encryptedBallotMessages
-                                                .Select(message => ByteSerializer.ConvertFromBase64String(message));
-            var ballotsArray = serializedBytesWithGCHandles.Select(result => result.SerializedBytes).ToArray();
-            var castedArray = castedBallotIds.Select(id => (ulong)id).ToArray();
+            var serializedBytesWithGcHandles = encryptedBallotMessages
+                                                .Select(ByteSerializer.ConvertFromBase64String);
+            var bytesWithGcHandles = serializedBytesWithGcHandles.ToList();
+            var ballotsArray = bytesWithGcHandles.Select(bytesWithGcHandle => bytesWithGcHandle.SerializedBytes).ToArray();
+            var castArray = castBallotIds.Select(id => (ulong)id).ToArray();
             var spoiledArray = spoiledBallotIds.Select(id => (ulong)id).ToArray();
-            var castedTrackerPtrs = new IntPtr[castedBallotIds.Count];
+            var castTrackerPtrs = new IntPtr[castBallotIds.Count];
             var spoiledTrackerPtrs = new IntPtr[spoiledBallotIds.Count];
 
             var success = API.RecordBallots((uint)electionGuardConfig.NumberOfSelections,
-                                            (uint)castedBallotIds.Count,
+                                            (uint)castBallotIds.Count,
                                             (uint)spoiledBallotIds.Count,
                                             (ulong)encryptedBallotMessages.Count,
-                                            castedArray,
+                                            castArray,
                                             spoiledArray,
                                             ballotsArray,
                                             exportPath,
                                             exportFilenamePrefix,
                                             out IntPtr outputFilenamePtr,
-                                            castedTrackerPtrs,
+                                            castTrackerPtrs,
                                             spoiledTrackerPtrs);
             if (!success)
             {
@@ -152,17 +151,17 @@ namespace ElectionGuard.SDK
             var result = new RecordBallotsResult()
             {
                 EncryptedBallotsFilename = Marshal.PtrToStringAnsi(outputFilenamePtr),
-                CastedBallotTrackers = castedTrackerPtrs.Select(tracker => Marshal.PtrToStringAnsi(tracker)).ToList(),
+                CastedBallotTrackers = castTrackerPtrs.Select(tracker => Marshal.PtrToStringAnsi(tracker)).ToList(),
                 SpoiledBallotTrackers = spoiledTrackerPtrs.Select(tracker => Marshal.PtrToStringAnsi(tracker)).ToList(),
             };
 
             // Free unmanaged memory
             API.FreeRecordBallots(outputFilenamePtr,
-                                  (uint)castedBallotIds.Count,
+                                  (uint)castBallotIds.Count,
                                   (uint)spoiledBallotIds.Count,
-                                  castedTrackerPtrs,
+                                  castTrackerPtrs,
                                   spoiledTrackerPtrs);
-            foreach (var bytes in serializedBytesWithGCHandles)
+            foreach (var bytes in bytesWithGcHandles)
             {
                 bytes.Handle.Free();
             }
@@ -171,7 +170,7 @@ namespace ElectionGuard.SDK
         }
 
         /// <summary>
-        /// Tallys the ballots file and Decrypts the results into a different output file
+        /// Tallies the ballots file and Decrypts the results into a different output file
         /// </summary>
         /// <param name="electionGuardConfig"></param>
         /// <param name="trusteeKeys"></param>
@@ -188,8 +187,9 @@ namespace ElectionGuard.SDK
                                                   string exportFilenamePrefix = "")
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
-            var serializedBytesWithGCHandles = trusteeKeys.Select(message => ByteSerializer.ConvertFromBase64String(message));
-            var trusteeKeysArray = serializedBytesWithGCHandles.Select(result => result.SerializedBytes).ToArray();
+            var serializedBytesWithGcHandles = trusteeKeys.Select(ByteSerializer.ConvertFromBase64String);
+            var bytesWithGcHandles = serializedBytesWithGcHandles.ToList();
+            var trusteeKeysArray = bytesWithGcHandles.Select(bytesWithGcHandle => bytesWithGcHandle.SerializedBytes).ToArray();
             var tallyResults = new uint[electionGuardConfig.NumberOfSelections];
 
             var success = API.TallyVotes(apiConfig,
@@ -213,49 +213,12 @@ namespace ElectionGuard.SDK
 
             // Free unmanaged memory
             API.FreeTallyVotes(outputFilenamePtr);
-            foreach (var bytes in serializedBytesWithGCHandles)
+            foreach (var bytes in bytesWithGcHandles)
             {
                 bytes.Handle.Free();
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Calculates the number of selections based on the given ElectionManifest
-        /// </summary>
-        /// <param name="electionManifest"></param>
-        /// <returns>number of selections</returns>
-        public static int CalculateSelections(ElectionManifest electionManifest)
-        {
-            var numberOfSelections = 0;
-            foreach (var contest in electionManifest.Contests)
-            {
-                switch (contest.Type.AsContestType())
-                {
-                    case ContestType.YesNo:
-                        numberOfSelections += 3; // Yes + No + Null Vote
-                        break;
-                    case ContestType.Candidate:
-                        var candidateContest = (CandidateContest)contest;
-                        numberOfSelections += candidateContest.Candidates.Length;
-                        numberOfSelections += candidateContest.Seats; // Null Votes
-                        if (candidateContest.AllowWriteIns)
-                        {
-                            numberOfSelections += 1 * candidateContest.Seats;
-                        }
-                        break;
-                }
-            }
-            if (numberOfSelections > Constants.MaxSelections)
-            {
-                throw new Exception("Max Selections Exceeded.");
-            }
-            if (numberOfSelections == 0)
-            {
-                throw new Exception("Election has no selections");
-            }
-            return numberOfSelections;
         }
     }
 }
