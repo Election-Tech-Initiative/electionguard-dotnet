@@ -12,8 +12,7 @@
 		<RepositoryUrl>https://github.com/microsoft/ElectionGuard-SDK-CSharp.git</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/microsoft/ElectionGuard-SDK</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>1.0.1</VersionPrefix>
-		<Version>1.0.2</Version>
+		<VersionPrefix>1.0.2</VersionPrefix>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\LICENSE">
