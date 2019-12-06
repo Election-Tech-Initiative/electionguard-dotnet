@@ -3,13 +3,13 @@ using ElectionGuard.SDK.Models;
 using System;
 using System.Collections.Generic;
 
-/// <summary>
-/// Simple console app to use as a playground for running the C# SDK methods
-/// This is easier to run when we want to use gdb to debug into the C methods
-/// that get called by the C# side.
-/// </summary>
 namespace TestApp
 {
+    /// <summary>
+    /// Simple console app to use as a playground for running the C# SDK methods
+    /// This is easier to run when we want to use gdb to debug into the C methods
+    /// that get called by the C# side.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -17,32 +17,21 @@ namespace TestApp
             var initialConfig = new ElectionGuardConfig()
             {
                 NumberOfTrustees = 3,
+                NumberOfSelections = 6,
                 Threshold = 3,
                 SubgroupOrder = 0,
                 ElectionMetadata = "placeholder",
             };
-            var manifest = new ElectionManifest()
-            {
-                Contests = new Contest[]{ 
-                    new YesNoContest()
-                    {
-                        Type = "YesNo"
-                    },
-                    new YesNoContest()
-                    {
-                        Type = "YesNo"
-                    }
-                },
-            };
 
-            var electionResult = Election.CreateElection(initialConfig, manifest);
+            var electionResult = ElectionGuardApi.CreateElection(initialConfig);
 
             // creates a single predictable ballot selections (election.NumberOfSelections should 6 for 2 sets of YesNoContest)
-            var selections = new bool[4][] {
-                new bool[6] { false, true, false, false, true, false },
-                new bool[6] { true, false, false, true, false, false },
-                new bool[6] { true, false, false, false, true, false },
-                new bool[6] { false, false, true, false, true, false }
+            var selections = new[]
+            {
+                new[] { false, true, false, false, true, false },
+                new[] { true, false, false, true, false, false },
+                new[] { true, false, false, false, true, false },
+                new[] { false, false, true, false, true, false }
             };
 
             var expectedNumberOfSelected = 2; // we have 2 true values in each of the selection arrays above
@@ -50,7 +39,7 @@ namespace TestApp
             var encryptedBallotList = new List<string>();
             for (var i = 0; i < selections.Length; i++)
             { 
-                var encryptBallotResult = Election.EncryptBallot(selections[i], expectedNumberOfSelected, electionResult.ElectionGuardConfig, currentNumberOfBallots);
+                var encryptBallotResult = ElectionGuardApi.EncryptBallot(selections[i], expectedNumberOfSelected, electionResult.ElectionGuardConfig, currentNumberOfBallots);
                 
                 currentNumberOfBallots = (int)encryptBallotResult.CurrentNumberOfBallots;
                 Console.WriteLine($"Encrypted Ballot {i}:");
@@ -62,16 +51,16 @@ namespace TestApp
                 encryptedBallotList.Add(encryptBallotResult.EncryptedBallotMessage);
             }
 
-            var castedIds = new List<long> { 0, 3 };
+            var castIds = new List<long> { 0, 3 };
             var spoiledIds = new List<long> { 1, 2 };
 
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var recordResult = Election.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castedIds, spoiledIds);
+            var recordResult = ElectionGuardApi.RecordBallots(electionResult.ElectionGuardConfig, encryptedBallotList, castIds, spoiledIds);
 
-            Console.WriteLine($"RecordBallots casted trackers");
-            foreach (var casted in recordResult.CastedBallotTrackers) {
-                Console.WriteLine($"\t{casted}");
+            Console.WriteLine($"RecordBallots cast trackers");
+            foreach (var cast in recordResult.CastedBallotTrackers) {
+                Console.WriteLine($"\t{cast}");
             }
             Console.WriteLine($"RecordBallots spoiled trackers");
             foreach (var spoiled in recordResult.SpoiledBallotTrackers)
@@ -84,7 +73,7 @@ namespace TestApp
             var numberOfTrusteesPresent = electionResult.ElectionGuardConfig.Threshold;
             // does not pass in optional export path or prefix-filename
             // will output voting results to CWD with default prefix
-            var tallyResult = Election.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename);
+            var tallyResult = ElectionGuardApi.TallyVotes(electionResult.ElectionGuardConfig, electionResult.TrusteeKeys.Values, numberOfTrusteesPresent, recordResult.EncryptedBallotsFilename);
 
             var tallyIndex = 0;
             Console.WriteLine("Tally Results:");
@@ -93,7 +82,7 @@ namespace TestApp
                 Console.WriteLine($"\t{tallyIndex}: {tally}");
                 tallyIndex++;
             }
-            Console.WriteLine($"TallyVotes ouputted to file = {tallyResult.EncryptedTallyFilename}");
+            Console.WriteLine($"TallyVotes output to file = {tallyResult.EncryptedTallyFilename}");
         }
     }
 }
