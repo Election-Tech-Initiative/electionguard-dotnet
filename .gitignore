@@ -332,3 +332,8 @@ ASALocalRun/
 
 # Built Libraries
 [Ll]ibs/
+tests/TestApp/ballots_encrypter/
+
+tests/TestApp/tallies/
+
+tests/TestApp/ballots/
