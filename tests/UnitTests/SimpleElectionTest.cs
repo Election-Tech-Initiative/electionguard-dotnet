@@ -7,12 +7,13 @@ using UnitTests.Mocks;
 
 namespace UnitTests
 {
-    [TestFixture(3, 3, 5, "exported_results", "test_ballots-", "test_tally-")]
+    [TestFixture(3, 3, 5, "exported_results", "encrypted-ballots","registered-ballots-", "test-tally-")]
     public class SimpleElectionTest
     {
         private ElectionGuardConfig _electionGuardConfig;
         private readonly int _numberOfBallots;
         private readonly string _exportFolder;
+        private readonly string _encryptedBallotsPrefix;
         private readonly string _ballotsPrefix;
         private readonly string _tallyPrefix;
         private readonly int _expectedNumberOfSelected;
@@ -24,14 +25,14 @@ namespace UnitTests
         // Voting
         private const string VotingStage = "Voting";
         private readonly ICollection<string> _encryptedBallots;
-        private readonly ICollection<long> _ballotIds;
+        private readonly ICollection<string> _ballotIds;
         private string _ballotsFilename;
 
         // Decryption
         private const string DecryptionStage = "Decryption";
 
         public SimpleElectionTest(int numberOfTrustees, int threshold, int numberOfBallots,
-            string exportFolder, string ballotsPrefix, string tallyPrefix)
+            string exportFolder, string encryptedBallotsPrefix, string ballotsPrefix, string tallyPrefix)
         {
             _electionGuardConfig = new ElectionGuardConfig()
             {
@@ -48,11 +49,12 @@ namespace UnitTests
             }
 
             _exportFolder = exportFolder;
+            _encryptedBallotsPrefix = encryptedBallotsPrefix;
             _ballotsPrefix = ballotsPrefix;
             _tallyPrefix = tallyPrefix;
             _numberOfBallots = numberOfBallots;
             _encryptedBallots = new List<string>();
-            _ballotIds = new List<long>();
+            _ballotIds = new List<string>();
             _expectedNumberOfSelected = 2;
         }
 
@@ -77,23 +79,32 @@ namespace UnitTests
         [Category(VotingStage)]
         public void Step02_VotingAndEncryption()
         {
+            var deleteSuccess = ElectionGuardApi.SoftDeleteEncryptedBallotsFile(_exportFolder, _encryptedBallotsPrefix);
             var currentNumBallots = 0;
             while (currentNumBallots < _numberOfBallots)
             {
                 // generates new random ballot
-                var randomBallot = BallotGenerator.FillRandomBallot(_electionGuardConfig.NumberOfSelections, _expectedNumberOfSelected);
+                var randomBallot = BallotGenerator.FillRandomBallot(
+                    _electionGuardConfig.NumberOfSelections, _expectedNumberOfSelected);
 
-                var result = ElectionGuardApi.EncryptBallot(randomBallot, _expectedNumberOfSelected, _electionGuardConfig, currentNumBallots);
+                var result = ElectionGuardApi.EncryptBallot(
+                    randomBallot, 
+                    _expectedNumberOfSelected, 
+                    _electionGuardConfig, 
+                    $"{currentNumBallots}",
+                    _exportFolder,
+                    _encryptedBallotsPrefix
+                );
 
                 Assert.IsNotEmpty(result.EncryptedBallotMessage);
                 Assert.IsNotEmpty(result.Tracker);
-                Assert.AreEqual(result.Identifier, currentNumBallots);
-                Assert.Greater(result.CurrentNumberOfBallots, currentNumBallots);
+                Assert.AreEqual($"{currentNumBallots}", result.ExternalIdentifier);
+                Assert.IsNotEmpty(result.OutputFileName);
 
                 _encryptedBallots.Add(result.EncryptedBallotMessage);
-                _ballotIds.Add(result.Identifier);
+                _ballotIds.Add(result.ExternalIdentifier);
 
-                currentNumBallots = (int)result.CurrentNumberOfBallots;
+                currentNumBallots++;
             }
         }
 
@@ -101,8 +112,8 @@ namespace UnitTests
         [Category(VotingStage)]
         public void Step03_RecordBallots()
         {
-            var castIds = new List<long>();
-            var spoiledIds = new List<long>();
+            var castIds = new List<string>();
+            var spoiledIds = new List<string>();
 
             // randomly assign to cast or spoil lists
             foreach(var id in _ballotIds)
@@ -117,12 +128,16 @@ namespace UnitTests
                 }
             }
 
-            var result = ElectionGuardApi.RecordBallots(_electionGuardConfig,
-                                                _encryptedBallots,
-                                                castIds,
-                                                spoiledIds,
-                                                _exportFolder,
-                                                _ballotsPrefix);
+            var result = ElectionGuardApi.RecordBallots(
+                _electionGuardConfig,
+                castIds,
+                spoiledIds,
+                _ballotIds,
+                _encryptedBallots,
+                _exportFolder,
+                _ballotsPrefix
+            );
+
             Assert.AreEqual(castIds.Count, result.CastedBallotTrackers.Count);
             Assert.AreEqual(spoiledIds.Count, result.SpoiledBallotTrackers.Count);
             _ballotsFilename = result.EncryptedBallotsFilename;
@@ -135,12 +150,14 @@ namespace UnitTests
         {
             // assume we have the equivalent number of trustees present to the threshold number required
             var numberOfTrusteesPresent = _electionGuardConfig.Threshold;
-            var result = ElectionGuardApi.TallyVotes(_electionGuardConfig,
-                                             _trusteeKeys.Values,
-                                             numberOfTrusteesPresent,
-                                             _ballotsFilename,
-                                             _exportFolder,
-                                             _tallyPrefix);
+            var result = ElectionGuardApi.TallyVotes(
+                _electionGuardConfig,
+                _trusteeKeys.Values,
+                numberOfTrusteesPresent,
+                _ballotsFilename,
+                _exportFolder,
+                _tallyPrefix
+            );
 
             Assert.IsNotNull(result.EncryptedTallyFilename);
             Assert.AreEqual(_electionGuardConfig.NumberOfSelections, result.TallyResults.Count);
