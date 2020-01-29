@@ -98,7 +98,7 @@ namespace UnitTests
 
                 Assert.IsNotEmpty(result.EncryptedBallotMessage);
                 Assert.IsNotEmpty(result.Tracker);
-                Assert.AreEqual(result.ExternalIdentifier, $"{currentNumBallots}");
+                Assert.AreEqual($"{currentNumBallots}", result.ExternalIdentifier);
                 Assert.IsNotEmpty(result.OutputFileName);
 
                 _encryptedBallots.Add(result.EncryptedBallotMessage);
