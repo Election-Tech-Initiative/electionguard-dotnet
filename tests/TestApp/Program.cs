@@ -55,15 +55,6 @@ namespace TestApp
                 }
             }
 
-            // creates a single predictable ballot selections (election.NumberOfSelections should 6 for 2 sets of YesNoContest)
-            // var selections = new[]
-            // {
-            //     new[] { false, true, false, false, true, false },
-            //     new[] { true, false, false, true, false, false },
-            //     new[] { true, false, false, false, true, false },
-            //     new[] { false, false, true, false, true, false }
-            // };
-
             // Encrypt Ballots
 
             Console.WriteLine("\n--- Encrypt Ballots ---\n");
