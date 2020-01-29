@@ -73,7 +73,7 @@ namespace ElectionGuard.SDK
         ///     and the file that includes the ballot</returns>
         public static EncryptBallotResult EncryptBallot(
             bool[] selections, int expectedNumberOfSelected, ElectionGuardConfig electionGuardConfig, string externalIdentifier,
-            string exportPath = "", string exportFileName = "")
+            string exportPath = "./", string exportFileName = "")
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
             var serializedBytesWithGcHandle = ByteSerializer.ConvertFromBase64String(electionGuardConfig.JointPublicKey);
@@ -125,7 +125,7 @@ namespace ElectionGuard.SDK
         /// <param name="filename">filename to have the system time appended to</param>
         /// <returns>boolean indicating the call succeeded or failed</returns>
         public static bool SoftDeleteEncryptedBallotsFile(
-            string exportPath = "", string exportFileName = "")
+            string exportPath = "./", string exportFileName = "")
         {
             var success = API.SoftDeleteEncryptedBallotsFile(
                             exportPath,
@@ -205,7 +205,7 @@ namespace ElectionGuard.SDK
                                                         ICollection<string> spoiledBallotIds,
                                                         ICollection<string> externalIdentifiers,
                                                         ICollection<string> encryptedBallotMessages,
-                                                        string exportPath = "",
+                                                        string exportPath = "./",
                                                         string exportFilenamePrefix = "")
         {
             var serializedBytesWithGcHandles = encryptedBallotMessages
@@ -279,7 +279,7 @@ namespace ElectionGuard.SDK
                                                   ICollection<string> trusteeKeys,
                                                   int numberOfTrusteesPresent,
                                                   string ballotsFilename,
-                                                  string exportPath = "",
+                                                  string exportPath = "./",
                                                   string exportFilenamePrefix = "")
         {
             var apiConfig = electionGuardConfig.GetApiConfig();
