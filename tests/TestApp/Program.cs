@@ -1,4 +1,4 @@
-﻿using ElectionGuard.SDK;
+using ElectionGuard.SDK;
 using ElectionGuard.SDK.Models;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace TestApp
         static int NUM_TRUSTEES = 3;
         static int THRESHOLD = 2;
         static int NUM_ENCRYPTERS = 3;
-        static int NUM_SELECTIONS = 12;                 // the number of total contest selections for an election
+        static int NUM_SELECTIONS = 17;                 // the number of total contest selections for an election
         static int DECRYPTING_TRUSTEES = 2;             // must be >= THRESHOLD && <= NUM_TRUSTEES
         static int NUM_RANDOM_BALLOTS = 5;              // the number of ballots to use when executing the test
 
@@ -59,8 +59,7 @@ namespace TestApp
 
             Console.WriteLine("\n--- Encrypt Ballots ---\n");
 
-            var now = new DateTime();
-
+            var now = DateTime.Now;
 
             var expectedNumberOfSelected = 2;
             var encryptedBallotsFileName = "";
@@ -113,7 +112,7 @@ namespace TestApp
 
             var loadBallotsResult = ElectionGuardApi.LoadBallotsFile(
                 0, 
-                NUM_RANDOM_BALLOTS, 
+                2000, 
                 NUM_SELECTIONS, 
                 encryptedBallotsFileName
             );
