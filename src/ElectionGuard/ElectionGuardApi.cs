@@ -173,9 +173,11 @@ namespace ElectionGuard.SDK
                 var result = new LoadBallotsResult()
                 {
                     ExternalIdentifiers = externalIdentifiers
-                        .Select(s => Marshal.PtrToStringAnsi(s))
+                        .Select(p => Marshal.PtrToStringAnsi(p))
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
                         .ToList(),
                     EncryptedBallotMessages = encryptedBallotMessages
+                        .Where(p => p.Length > 0)
                         .Select(p => ByteSerializer.ConvertToBase64String(p))
                         .ToList()
                 };
