@@ -1,6 +1,11 @@
 ![Microsoft Defending Democracy Program: ElectionGuard](images/electionguard-banner.svg)
 
-# 🗳️ ElectionGuard SDK C#
+# Note: This repository has been deprecated & transitioned
+As of 06/15/2020, this repository is no longer being actively maintained. ElectionGuard development has transitioned to the [ElectionGuard-Python](https://github.com/microsoft/electionguard-python) Repo.
+
+This repository will remain open sourced and available, but will no longer be actively maintained or updated. Updates will be posted here and on our [Main repository](https://aka.ms/electionguard) Page. This URL will become archived and read-only in Summer of 2020.
+
+## 🗳️ ElectionGuard SDK C#
 
 ![build](https://github.com/microsoft/electionguard-dotnet/workflows/Package/badge.svg)
 [![nuget](https://img.shields.io/nuget/dt/ElectionGuard.SDK)](https://www.nuget.org/packages/ElectionGuard.SDK)
